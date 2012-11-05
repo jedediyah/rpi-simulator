@@ -78,7 +78,7 @@ void GLWidget::initializeGL()
 
     
     sim.addCube();
-    //sim.addSphere();
+    sim.addSphere();
 }
 
 // The main DRAW function 
@@ -139,6 +139,8 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
     camRYp = CamYrot;
     camXi = event->x();
     camYi = event->y();
+    
+    cout << "Starting rotation with (" << camRXp << ", " << camRYp << ")" << endl;
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
@@ -147,12 +149,13 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     cout << "Mouse Event" << endl; 
     int x = event->x();
     int y = event->y();
-    cout << "   " << x-camXi << ", " << camYi-y << endl;  
-    cout << x << ", "  << y << endl; 
-    
+    cout << "   dX = " << x-camXi << ",   dY = " << camYi-y << endl;  
+     
     double rotScale = 0.01;
-    CamXrot = camRXp + (x-camXi)*rotScale;
-    CamYrot = camRYp + (camYi-y)*rotScale;  // Y is of course backwards
+    CamXrot = camRXp + (camYi-y)*rotScale; 
+    CamYrot = camRYp + (camXi-x)*rotScale; 
+    
+    cout << "Updating rotation (" << CamXrot << ", " << CamYrot << ")" << endl;
     
     mat Rx = zeros(3,3);  // Init rotation matrices
     mat Ry = zeros(3,3);
@@ -162,22 +165,23 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
     Rx(2,2) = cos(CamXrot);
     Rx(1,2) = -sin(CamXrot);
     Rx(2,1) = sin(CamXrot);
+    Rx.print();
     
     Ry(1,1) = 1;
     Ry(0,0) = cos(CamYrot);
     Ry(2,2) = cos(CamYrot);
-    Ry(0,2) = -sin(CamYrot);
-    Ry(2,0) = sin(CamYrot); 
+    Ry(2,0) = -sin(CamYrot);
+    Ry(0,2) = sin(CamYrot); 
     
     mat zi = zeros(3,1);
     zi(0,0) = CamInit[0];
     zi(1,0) = CamInit[1];
     zi(2,0) = CamInit[2]; 
     
-    mat result = Ry*Rx*zi; 
-    Camera[0] = result(0);
-    Camera[1] = result(1);
-    Camera[2] = result(2); 
+    mat r = Rx*Ry*zi;   // Order doesn't matter, right? 
+    Camera[0] = r(0);
+    Camera[1] = r(1);
+    Camera[2] = r(2); 
     
 }
 
