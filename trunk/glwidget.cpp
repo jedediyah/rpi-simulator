@@ -66,20 +66,9 @@ void GLWidget::initializeGL()
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-
-    cube = Body_trimesh("cube.poly");
-    cube.scale(3.0); 
-    cube.setVelocity(0.3,0.,0.,1,2,.3);
-    cube.initializeGL(); 
     
-    sphr1 = Body_sphere();
-    sphr1.setPosition(-9.0, 2.0, 0.0);
-    sphr1.setRadius(0.5); 
-    
-    sphr2 = Body_sphere();
-    sphr2.setPosition(-12.0, -4.0, 0.0);
-    sphr2.setRadius(1.5); 
-
+    sim.addCube();
+    sim.addSphere();
 }
 
 // The main DRAW function 
@@ -93,17 +82,15 @@ void GLWidget::paintGL()
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+//    cube.stepDynamics(.01);  
+//    cube.updateWorld_Verts(); 
+//    cube.draw();
     
+    cout << " Sim time... " << endl; 
     sim.draw();
     
-    sphr1.draw();
-    sphr2.draw();
-    
-    cube.stepDynamics(.01);  
-    cube.updateWorld_Verts(); 
-    cube.draw();
-    
-    
+
     glFlush(); 
 }
 

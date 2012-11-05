@@ -21,7 +21,7 @@ public:
     void draw(); 
     
 private:
-    // Sphere properties distanct from generic Body_object
+    // Sphere properties distinct from generic Body_object
     double Radius;  
 
 };

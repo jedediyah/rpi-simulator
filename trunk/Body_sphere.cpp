@@ -16,6 +16,8 @@
 
 
 Body_sphere::Body_sphere() {
+    Body_object::set_body_type("sphere");
+    Radius = 1.0; 
 }
 
 Body_sphere::Body_sphere(const Body_sphere& orig) {

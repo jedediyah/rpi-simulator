@@ -35,6 +35,8 @@ Body_object::~Body_object() {
 
 // Get methods
 string Body_object::name()               { return Name; }
+void   Body_object::set_body_type(string bt) { Body_Type = bt; }
+string Body_object::body_type()          { return Body_Type; }
 double Body_object::mass()               { return Mass; }
 mat Body_object::mass_inertia_matrix()   { return Mass_Inertia_Matrix; }
 vec Body_object::u()                     { return U; }

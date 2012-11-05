@@ -117,6 +117,7 @@ Body_trimesh::Body_trimesh(string filename) {
 //        triangleIndecies[3*f+2] = Faces[f].vert_indicies()[2];
 //    }
     
+    Body_object::set_body_type("trimesh"); 
 }
 
 // Remove comments from string
@@ -178,6 +179,7 @@ void Body_trimesh::scale(double s) {
         Local_Verts[3*v+1] = Local_Verts[3*v+1] * s;
         Local_Verts[3*v+2] = Local_Verts[3*v+2] * s;
     }
+    this->updateWorld_Verts();
 }
 
 void Body_trimesh::updateWorld_Verts() {

@@ -21,6 +21,7 @@ public:
     Body_trimesh cube; 
     Body_sphere sphr1;
     Body_sphere sphr2; 
+    Body_sphere sphr3;
     
     bool wireframe; 
 

@@ -12,10 +12,8 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
         
     glWidget = new GLWidget;
     glWidget->sim = SIM; 
-    glWidget->sim.setOneSingleSphereRadius(50.0);
     
     ui->verticalLayout_2->addWidget( glWidget );
-    
 
     A_info = new QAction(tr("Info"), this);
     ui->menuBar->addAction( A_info );

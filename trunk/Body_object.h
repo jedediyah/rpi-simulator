@@ -22,6 +22,8 @@ public:
     
     // Get methods
     string name();              // Name of body
+    void set_body_type(string bt); 
+    string body_type();           // Type of body, e.g. trimesh, sphere, cylinder, etc.
     double mass ();             // Mass of body
     mat mass_inertia_matrix (); // diag( 3x3 mass matrix, 3x3 inertia tensor )
     vec u ();                   // Position [x y z]
@@ -59,6 +61,7 @@ public:
 private:
     // Dynamics variables 
     string Name; // Name of object
+    string Body_Type; 
     double Mass;
     mat Mass_Inertia_Matrix;  // 6x6
     vec U;      // Position [x y z]

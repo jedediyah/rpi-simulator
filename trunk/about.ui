@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>about</class>
+ <widget class="QDialog" name="about">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>396</width>
+    <height>264</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>396</width>
+    <height>264</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>396</width>
+    <height>264</height>
+   </size>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::NoContextMenu</enum>
+  </property>
+  <property name="windowTitle">
+   <string>About</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="res.qrc">
+    <normaloff>:/icon/icon</normaloff>:/icon/icon</iconset>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>371</width>
+     <height>251</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;HTML&gt;&lt;BODY&gt;Open Simulator is a rigid body physics simulator.  The dynamics behind OSim is the same as is implemented in the &lt;/a href=&quot;http://code.google.com/p/rpi-matlab-simulator/&quot;&gt;RPI-MATLAB-Simulator&lt;/a&gt;.&lt;/BODY&gt;&lt;/HTML&gt;</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
+   </property>
+   <property name="textInteractionFlags">
+    <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse</set>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
+ <connections/>
+</ui>
