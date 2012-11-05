@@ -27,8 +27,8 @@ Simulation::~Simulation() {
 }
 
 void Simulation::draw() { 
-    cout << "---------------------" << endl;
-    cout << "   Drawing " << TotalBodyCount << " bodies... " << endl;
+    //cout << "---------------------" << endl;
+    //cout << "   Drawing " << TotalBodyCount << " bodies... " << endl;
     //for (int i=0; i<Bodies.size(); i++)
     //    Bodies.at(i).draw();
 //    for (int i=0; i<Mesh_Bodies.size(); i++) {
@@ -86,6 +86,8 @@ void Simulation::addCube() {
     cube.scale(13.0); 
     cube.setVelocity(0.3,0.,0.,1,2,.3);
     cube.initializeGL(); 
+    cube.setQuaternion(.9888, .0399, .0799, .1198); 
+    cube.updateWorld_Verts(); 
    
     this->addBody(cube); 
 }

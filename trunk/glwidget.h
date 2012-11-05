@@ -18,10 +18,13 @@ public:
     void resizeGL(int width, int height);
     short int col;
     Simulation sim;  
-    Body_trimesh cube; 
-    Body_sphere sphr1;
-    Body_sphere sphr2; 
-    Body_sphere sphr3;
+    double Camera[3]; 
+    double CamInit[3];
+    double CamXrot;
+    double CamYrot; 
+    double camRXp, camRYp; 
+    double camXi, camYi;
+    //double camXf, camYf; 
     
     bool wireframe; 
 

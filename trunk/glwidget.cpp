@@ -1,7 +1,14 @@
 
 
+#include <armadillo>
 #include "glwidget.h"
 #include "Body_trimesh.h"
+
+#ifdef __APPLE__
+#  include <GLUT/glut.h>
+#else
+#  include <GL/glut.h>
+#endif
 
 GLWidget::GLWidget()
 {
@@ -14,6 +21,9 @@ GLWidget::GLWidget()
 void GLWidget::initializeGL()
 {
     cout << "Initializing GL." << endl;
+    CamInit[0]=0;           CamInit[1]=0;           CamInit[2]=20;
+    Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2];  
+    
     //initialization of OpenGLglColor3f(0.0, 0.0, 0.3);
 
     glClearColor(0.5f, 0.5f, 0.5f, 0.f);
@@ -68,7 +78,7 @@ void GLWidget::initializeGL()
 
     
     sim.addCube();
-    sim.addSphere();
+    //sim.addSphere();
 }
 
 // The main DRAW function 
@@ -87,10 +97,15 @@ void GLWidget::paintGL()
 //    cube.updateWorld_Verts(); 
 //    cube.draw();
     
-    cout << " Sim time... " << endl; 
+    // Rotate camera
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(Camera[0],Camera[1],Camera[2],  // Camera position
+              0,0,0,   // Look at center 
+              0,1,0);  // Y-direction is up
+    
     sim.draw();
     
-
     glFlush(); 
 }
 
@@ -107,8 +122,9 @@ void GLWidget::resizeGL(int width, int height)
 
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   //glOrtho(-150.0, 150.0, -150.0, 150.0, -10.0, 10.0);
-   glOrtho(-20.0, 20.0, -20.0, 20.0, -10.0, 10.0);
+   glOrtho(-20.0, 20.0, -20.0, 20.0, -100.0, 100.0);
+   //gluPerspective(50, width/height, 1, 100);
+   
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
@@ -118,12 +134,51 @@ void GLWidget::mousePressEvent(QMouseEvent *event)
 {
   //process mouse events for rotate/move inside 3D scene
     cout << "Mouse Press" << endl;
+    cout << "Button: " << event->button() << endl; 
+    camRXp = CamXrot;
+    camRYp = CamYrot;
+    camXi = event->x();
+    camYi = event->y();
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
  //process keyboard events
     cout << "Mouse Event" << endl; 
+    int x = event->x();
+    int y = event->y();
+    cout << "   " << x-camXi << ", " << camYi-y << endl;  
+    cout << x << ", "  << y << endl; 
+    
+    double rotScale = 0.01;
+    CamXrot = camRXp + (x-camXi)*rotScale;
+    CamYrot = camRYp + (camYi-y)*rotScale;  // Y is of course backwards
+    
+    mat Rx = zeros(3,3);  // Init rotation matrices
+    mat Ry = zeros(3,3);
+    
+    Rx(0,0) = 1;
+    Rx(1,1) = cos(CamXrot); 
+    Rx(2,2) = cos(CamXrot);
+    Rx(1,2) = -sin(CamXrot);
+    Rx(2,1) = sin(CamXrot);
+    
+    Ry(1,1) = 1;
+    Ry(0,0) = cos(CamYrot);
+    Ry(2,2) = cos(CamYrot);
+    Ry(0,2) = -sin(CamYrot);
+    Ry(2,0) = sin(CamYrot); 
+    
+    mat zi = zeros(3,1);
+    zi(0,0) = CamInit[0];
+    zi(1,0) = CamInit[1];
+    zi(2,0) = CamInit[2]; 
+    
+    mat result = Ry*Rx*zi; 
+    Camera[0] = result(0);
+    Camera[1] = result(1);
+    Camera[2] = result(2); 
+    
 }
 
 void GLWidget::timerEvent(QTimerEvent *event)

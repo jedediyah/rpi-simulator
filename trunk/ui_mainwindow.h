@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sun Nov 4 23:27:30 2012
+** Created: Mon Nov 5 14:47:12 2012
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -251,8 +251,8 @@ public:
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:'Sans'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">Simple example using QGLWidget inside a verticalLayout created with QTCreator/QtDesigner.</span></p></body></html>", 0, QApplication::UnicodeUTF8));
-        label_2->setText(QApplication::translate("MainWindowClass", "Rotation coord:", 0, QApplication::UnicodeUTF8));
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">Objects table here.</span></p></body></html>", 0, QApplication::UnicodeUTF8));
+        label_2->setText(QApplication::translate("MainWindowClass", "Camera coord:", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindowClass", "x:", 0, QApplication::UnicodeUTF8));
         label_X->setText(QApplication::translate("MainWindowClass", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"

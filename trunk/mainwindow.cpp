@@ -54,10 +54,10 @@ void MainWindow::S_labelUpdate()
 {
 QVariant v;
 
-     v = glWidget->rotX;
+     v = glWidget->Camera[0];
     ui->label_X->setText( v.toString() );
-     v = glWidget->rotY;
+     v = glWidget->Camera[1];
     ui->label_Y->setText( v.toString() );
-     v = glWidget->rotZ;
+     v = glWidget->Camera[2];
     ui->label_Z->setText( v.toString() );
 }

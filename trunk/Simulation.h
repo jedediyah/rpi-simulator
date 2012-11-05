@@ -31,14 +31,6 @@ public:
     void addSphere();
     
 private:
-    //Body_sphere oneSingleSphere; 
-    
-    
-    // Currently, I'll be working only with these body types.
-    // It would be nice if they could all be in the same vector.  Alas. 
-//    vector<Body_object> Bodies; 
-//    vector<Body_trimesh> Mesh_Bodies;
-//    vector<Body_sphere> Sphere_Bodies; 
     
     int TotalBodyCount;
     
