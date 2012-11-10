@@ -18,7 +18,11 @@ public:
     
     double radius();
     void setRadius(double r); 
-    void draw(); 
+    
+    // Graphics methods
+    void drawSphere(); 
+    void initializeGL(); 
+    void draw(bool wireframe); // OpenGL draw method
     
 private:
     // Sphere properties distinct from generic Body_object

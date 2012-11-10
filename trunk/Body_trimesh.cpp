@@ -223,7 +223,7 @@ void Body_trimesh::setVertices(double v[], int num_v) {
 void Body_trimesh::printVertices() {
     cout << "-------------" << endl; 
     for (int i=0; i<Num_Verts; i++) {
-        cout << World_Verts[3*i] << ", ";
+        cout << World_Verts[3*i+0] << ", ";
         cout << World_Verts[3*i+1] << ", ";
         cout << World_Verts[3*i+2];  
         cout << endl;
@@ -242,7 +242,7 @@ void Body_trimesh::initializeGL(){
     // Copy edges into trianagleIndecies
     triangleIndecies = new unsigned char [3*Num_Faces];
     for (int f=0; f<Num_Faces; f++) {
-        triangleIndecies[3*f+0] = Faces[f].vert_indicies()[0];
+        triangleIndecies[3*f+0] = Faces[f].vert_indicies()[0];  // I think I confused faces with verts!!!
         triangleIndecies[3*f+1] = Faces[f].vert_indicies()[1];
         triangleIndecies[3*f+2] = Faces[f].vert_indicies()[2];
     }
@@ -256,16 +256,43 @@ void Body_trimesh::draw() {
     // TODO: Take care of color
     
     // Material property vectors.
-    float matAmbAndDif[] = {0.7, 0.1, 0.1, 1.0};
-    float matSpec[] = {1.0, 1.0, 1.0, 1.0};
-    float matShine[] = {10.0};
-
-    // Material properties of the mesh.
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpec);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShine);
+//    float matAmbAndDif[] = {0.7, 0.1, 0.1, 1.0};
+//    float matSpec[] = {1.0, 1.0, 1.0, 1.0};
+//    float matShine[] = {10.0};
+//
+//    // Material properties of the mesh.
+//    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif);
+//    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpec);
+//    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShine);
     
-    glDrawElements(GL_TRIANGLES, 3*Num_Faces, GL_UNSIGNED_BYTE, triangleIndecies);
+    //cout << Body_object::name() << endl; 
+    //glDrawElements(GL_TRIANGLES, 3*Num_Faces, GL_UNSIGNED_BYTE, triangleIndecies);
+    printVertices();
+    
+    
+    //this->updateWorld_Verts();
+    
+//               glBegin(GL_POLYGON);
+//                glVertex3f(-5.0,-5.0,0.0);
+//                glVertex3f(15.0,-5.0,0.0);
+//                glVertex3f(15.0,15.0,-5.0);
+//                glVertex3f(-5.0,15.0,0.0);
+//               glEnd();
+ 
+    // Don't need to transform since we have the world coordinates.
+    // Draw each face
+    for (int f=0; f<Num_Faces; f++) {
+       glBegin(GL_POLYGON);
+          for (int v=0; v<Faces[f].num_verts(); v++) {
+            int vdex = Faces[f].vert_indicies()[v]; 
+            double vx = World_Verts[ 3*vdex+0 ];
+            double vy = World_Verts[ 3*vdex+1 ];
+            double vz = World_Verts[ 3*vdex+2 ]; // Should ALWAYS be a tri-face
+            //cout << "Face [" << f << "]: "<<vx<<", "<<vy<<", "<<vz << endl;
+            glVertex3f( vx,vy,vz );
+          }
+       glEnd();
+    }
     
 }
 

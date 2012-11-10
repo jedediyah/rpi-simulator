@@ -18,67 +18,56 @@ GLWidget::GLWidget()
     wireframe = false;
 }
 
+// GL Lighting for the entire scene
+// Places a SUN in the "sky" 
+void GLWidget::worldLighting() {
+    glClearColor(0.5f, 0.5f, 0.5f, 0.f);
+
+    glEnable(GL_DEPTH_TEST); // Enable depth testing.
+
+    // Turn on OpenGL lighting.
+    glEnable(GL_LIGHTING);
+
+    // Light property vectors.
+    float lightAmb[] = { 0.0, 0.0, 0.0, 1.0 };
+    float lightDifAndSpec0[] = { 1.0, 1.0, 1.0, 1.0 };
+    float lightDifAndSpec1[] = { 0.0, 1.0, 0.0, 1.0 };
+    float globAmb[] = { 0.2, 0.2, 0.2, 1.0 };
+
+    // Light0 properties.
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDifAndSpec0);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec0);
+
+    // Light1 properties.
+//    glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmb);
+//    glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDifAndSpec1);
+//    glLightfv(GL_LIGHT1, GL_SPECULAR, lightDifAndSpec1);
+
+    glEnable(GL_LIGHT0); // Enable particular light source.
+//    glEnable(GL_LIGHT1); // Enable particular light source.
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb); // Global ambient light.
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE); // Enable local viewpoint
+
+    // Cull back faces.
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+}
+
+// Init OpenGl
 void GLWidget::initializeGL()
 {
     cout << "Initializing GL." << endl;
     CamInit[0]=0;           CamInit[1]=0;           CamInit[2]=20;
     Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2];  
     
-    //initialization of OpenGLglColor3f(0.0, 0.0, 0.3);
-
-    glClearColor(0.5f, 0.5f, 0.5f, 0.f);
-    //resizeGL( 400 , 300 );
-
-    glShadeModel( GL_SMOOTH );
-    //glShadeModel (GL_FLAT);
-    glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
-    glEnable( GL_TEXTURE_2D );
-    glEnable( GL_CULL_FACE );
-    glEnable( GL_DEPTH_TEST );
+    worldLighting(); 
     
-    
-        //glClearColor(0.0, 0.0, 0.0, 0.0);
-        //glEnable(GL_DEPTH_TEST); // Enable depth testing.
-
-        // Turn on OpenGL lighting.
-        glEnable(GL_LIGHTING);
-
-        // Light property vectors.
-        float lightAmb[] = { 0.0, 0.0, 0.0, 1.0 };
-        float lightDifAndSpec0[] = { 1.0, 1.0, 5.0, 1.0 };
-        float lightDifAndSpec1[] = { 0.0, 1.0, 0.0, 1.0 };
-        float globAmb[] = { 0.2, 0.2, 0.2, 1.0 };
-	float lightPos[] = { 0.0, 10.0, 20.0, 1.0 };  // Light position
-
-        // Light0 properties.
-        glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDifAndSpec0);
-        glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec0);
-        glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-
-        // Light1 properties.
-        //glEnable(GL_LIGHT1); // Enable particular light source.
-        //glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmb);
-        //glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDifAndSpec1);
-        //glLightfv(GL_LIGHT1, GL_SPECULAR, lightDifAndSpec1);
-
-        glEnable(GL_LIGHT0); // Enable particular light source.
-        
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb); // Global ambient light.
-        glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE); // Enable local v
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE); // Enable two-sided lighting.
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE); // Enable local viewpoint.
-        
-        glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE); // Enable two-sided lighting.
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE); // Enable local viewpoint.
-        
-        // Cull back faces.
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-    
+    sim.addCube();      // TODO
     sim.addCube();
     sim.addSphere();
+    //sim.addSphere();
+    //sim.addSphere();
 }
 
 // The main DRAW function 
@@ -87,15 +76,13 @@ void GLWidget::paintGL()
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0, 1.0, 0.5);
     
+    
+    wireframe = true; 
     // Wire-frame or not
     if (wireframe)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     else
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-//    cube.stepDynamics(.01);  
-//    cube.updateWorld_Verts(); 
-//    cube.draw();
     
     // Rotate camera
     glMatrixMode(GL_MODELVIEW);
@@ -104,7 +91,7 @@ void GLWidget::paintGL()
               0,0,0,   // Look at center 
               0,1,0);  // Y-direction is up
     
-    sim.draw();
+    sim.draw(wireframe);
     
     glFlush(); 
 }

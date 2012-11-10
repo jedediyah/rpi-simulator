@@ -19,7 +19,7 @@ public:
     Simulation(const Simulation& orig);
     virtual ~Simulation();
 
-    void draw(); 
+    void draw(bool wireframe); 
     
     bool addBody(Body_object &body); 
     bool addBody(Body_sphere &body);

@@ -26,7 +26,7 @@ Simulation::Simulation(const Simulation& orig) {
 Simulation::~Simulation() {
 }
 
-void Simulation::draw() { 
+void Simulation::draw(bool wireframe) { 
     //cout << "---------------------" << endl;
     //cout << "   Drawing " << TotalBodyCount << " bodies... " << endl;
     //for (int i=0; i<Bodies.size(); i++)
@@ -39,10 +39,16 @@ void Simulation::draw() {
 //        Sphere_Bodies.at(i).draw();
 //        cout << " Name: " << Sphere_Bodies.at(i).name() << endl;
 //    }
-    for (int i=0; i<Num_Trimeshes; i++)
+    
+    
+    for (int i=0; i<Num_Trimeshes; i++) // Draw all Trimeshes
         Trimesh_Bodies[i].draw();
-    for (int i=0; i<Num_Spheres; i++)
-        Sphere_Bodies[i].draw(); 
+    
+    for (int i=0; i<Num_Spheres; i++)   // Draw all Spheres
+        Sphere_Bodies[i].draw(wireframe); 
+
+//    for (int i=Num_Spheres-1; i>=0; i--)
+//        Sphere_Bodies[i].draw(); 
     
 }
 
@@ -82,19 +88,50 @@ bool Simulation::removeBody(int bodyID) {
 }
 
 void Simulation::addCube() {
-    Body_trimesh cube = Body_trimesh("cube.poly");
-    cube.scale(13.0); 
-    cube.setVelocity(0.3,0.,0.,1,2,.3);
-    cube.initializeGL(); 
-    cube.setQuaternion(.9888, .0399, .0799, .1198); 
-    cube.updateWorld_Verts(); 
+    if (Num_Trimeshes == 0) {
+        Body_trimesh cube = Body_trimesh("cube.poly");
+        cube.scale(13.0); 
+        cube.setVelocity(0.3,0.,0.,1,2,.3);
+        cube.initializeGL(); 
+        cube.setQuaternion(.9888, .0399, .0799, .1198); 
+        cube.updateWorld_Verts();
+        cube.setName("c1");
+        cube.setPosition(-12.0, 4.0, 0.0);
+        this->addBody(cube);
+    }
+    else {
+        Body_trimesh cube = Body_trimesh("cube.poly");
+        cube.scale(5.0); 
+        cube.setPosition(12.0, -4.0, 0.0);
+        cube.setVelocity(-0.3,0.,0.,1,2,.3);
+        cube.initializeGL(); 
+        cube.setQuaternion(.9888, .0399, .0799, .1198); 
+        cube.updateWorld_Verts();
+        cube.setName("c2"); 
+        this->addBody(cube);
+    }
    
-    this->addBody(cube); 
+     
 }
 
 void Simulation::addSphere() {
     Body_sphere sphere = Body_sphere();
-    sphere.setPosition(-13., 3., 0.0);
+    
+    if ( Num_Spheres == 1 ) {
+        sphere.setPosition(-13., 3., 0.0);
+        sphere.setName("s2"); 
+        sphere.setQuaternion(.0707, .2666, .5332, .7998);
+    }
+    else if (Num_Spheres == 2 ) {
+        sphere.setRadius(2.0);
+        sphere.setPosition(5,2,0);
+        sphere.setName("s3"); 
+    }
+    else {
+        sphere.setPosition(-14,-5,0.0);
+        sphere.setRadius(3.0);
+        sphere.setName("s1"); 
+    }
     
     this->addBody(sphere); 
     

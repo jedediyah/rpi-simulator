@@ -30,6 +30,7 @@ public:
 
 protected:
     void initializeGL();
+    void worldLighting();
     void paintGL();
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
