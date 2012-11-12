@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="84">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>Body_Edge.h</itemPath>
+      <itemPath>Body_Face.h</itemPath>
+      <itemPath>Body_Vertex.h</itemPath>
+      <itemPath>Body_object.h</itemPath>
+      <itemPath>Body_polymesh.h</itemPath>
+      <itemPath>Body_sphere.h</itemPath>
+      <itemPath>Body_trimesh.h</itemPath>
+      <itemPath>CollisionDetection.h</itemPath>
+      <itemPath>Contact.h</itemPath>
+      <itemPath>Simulation.h</itemPath>
+      <itemPath>SimulationEnvironment.h</itemPath>
+      <itemPath>cdaDynamics.h</itemPath>
+      <itemPath>lcpDynamics.h</itemPath>
+      <itemPath>lcp_nsqp.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>Body_Edge.cpp</itemPath>
+      <itemPath>Body_Face.cpp</itemPath>
+      <itemPath>Body_Vertex.cpp</itemPath>
+      <itemPath>Body_object.cpp</itemPath>
+      <itemPath>Body_polymesh.cpp</itemPath>
+      <itemPath>Body_sphere.cpp</itemPath>
+      <itemPath>Body_trimesh.cpp</itemPath>
+      <itemPath>CollisionDetection.cpp</itemPath>
+      <itemPath>Contact.cpp</itemPath>
+      <itemPath>Simulation.cpp</itemPath>
+      <itemPath>SimulationEnvironment.cpp</itemPath>
+      <itemPath>main.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+    <itemPath>Makefile</itemPath>
+    <itemPath>j.png</itemPath>
+    <itemPath>mk</itemPath>
+    <itemPath>ql0001.f</itemPath>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>PATH</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>GNU|GNU</compilerSet>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <commandLine>-IPATH</commandLine>
+        </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerOptionItem>-I/usr/include -L/usr/lib -lglut -lGL -lGLU -lX11</linkerOptionItem>
+            <linkerLibLibItem>armadillo</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>PATH</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>PATH</pElem>
+          </incDir>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+    </conf>
+  </confs>
+</configurationDescriptor>
