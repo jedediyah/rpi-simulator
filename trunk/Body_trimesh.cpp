@@ -267,7 +267,8 @@ void Body_trimesh::draw() {
     
     //cout << Body_object::name() << endl; 
     //glDrawElements(GL_TRIANGLES, 3*Num_Faces, GL_UNSIGNED_BYTE, triangleIndecies);
-    printVertices();
+    
+    //printVertices();
     
     
     //this->updateWorld_Verts();

@@ -29,9 +29,12 @@ public:
     bool wireframe; 
 
 protected:
+    //void keyPressed(unsigned char key, int x, int y);
     void initializeGL();
     void worldLighting();
     void paintGL();
+    void keyPressEvent(QKeyEvent*); 
+    void keyReleaseEvent(QKeyEvent*);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void timerEvent(QTimerEvent *event);

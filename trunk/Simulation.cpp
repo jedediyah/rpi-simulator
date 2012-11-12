@@ -41,11 +41,16 @@ void Simulation::draw(bool wireframe) {
 //    }
     
     
-    for (int i=0; i<Num_Trimeshes; i++) // Draw all Trimeshes
+    for (int i=0; i<Num_Trimeshes; i++) { // Draw all Trimeshes
+        Trimesh_Bodies[i].stepDynamics(0.01);
+        Trimesh_Bodies[i].updateWorld_Verts();
         Trimesh_Bodies[i].draw();
+    }
     
-    for (int i=0; i<Num_Spheres; i++)   // Draw all Spheres
-        Sphere_Bodies[i].draw(wireframe); 
+    for (int i=0; i<Num_Spheres; i++) {   // Draw all Spheres
+        Sphere_Bodies[i].stepDynamics(.01);
+        Sphere_Bodies[i].draw(wireframe);
+    }
 
 //    for (int i=Num_Spheres-1; i>=0; i--)
 //        Sphere_Bodies[i].draw(); 
@@ -91,7 +96,7 @@ void Simulation::addCube() {
     if (Num_Trimeshes == 0) {
         Body_trimesh cube = Body_trimesh("cube.poly");
         cube.scale(13.0); 
-        cube.setVelocity(0.3,0.,0.,1,2,.3);
+        cube.setVelocity(0.5,0.,0.,1,2,.3);
         cube.initializeGL(); 
         cube.setQuaternion(.9888, .0399, .0799, .1198); 
         cube.updateWorld_Verts();
@@ -130,6 +135,7 @@ void Simulation::addSphere() {
     else {
         sphere.setPosition(-14,-5,0.0);
         sphere.setRadius(3.0);
+        sphere.setVelocity(0,0,0,0,.3,0);
         sphere.setName("s1"); 
     }
     

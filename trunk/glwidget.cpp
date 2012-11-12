@@ -54,10 +54,22 @@ void GLWidget::worldLighting() {
     glCullFace(GL_BACK);
 }
 
+void GLWidget::keyPressEvent(QKeyEvent*) {
+    cout << "keypress" << endl;
+}
+
+void GLWidget::keyReleaseEvent(QKeyEvent*) {
+    
+    cout << "KEY RELEASE" << endl;
+}
+
 // Init OpenGl
 void GLWidget::initializeGL()
 {
     cout << "Initializing GL." << endl;
+    
+    //glutKeyboardFunc(keyPressed); 
+    
     CamInit[0]=0;           CamInit[1]=0;           CamInit[2]=20;
     Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2];  
     
