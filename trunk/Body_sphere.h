@@ -18,6 +18,7 @@ public:
     
     double radius();
     void setRadius(double r); 
+    void updateMassInertia();
     
     // Graphics methods
     void drawSphere(); 

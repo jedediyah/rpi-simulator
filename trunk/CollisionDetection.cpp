@@ -26,9 +26,12 @@ CollisionDetection::~CollisionDetection() {
 mat arbitraryTangent(mat n) {
     vec Y = zeros(3,1);  Y(1) = 1;
     vec Z = zeros(3,1);  Z(2) = 1;
+    vec T; 
     if ( abs(dot(n,Z)) < 0.7 )
-        return cross(n,Z);
-    return cross(n,Y); 
+        T = cross(n,Z);
+    else
+        T = cross(n,Y); 
+    return T / norm(T,2); 
 }
 
 void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int &num_contacts, 
@@ -47,6 +50,31 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
         spheres[s].ContactCount = 0;
     }
     
+    
+     ////////////////////////////////////////////////////////////////
+    // Sphere-Ground collision detection
+    for (int s = 0; s < num_spheres; s++) {
+        if (!spheres[s].isStaticBody()) {
+            mat psi = zeros(1);
+            psi.at(0) = spheres[s].u().at(2) - spheres[s].radius(); // psi=height-radius
+            mat n = zeros(3, 1);
+            n.at(2) = 1.0; // Normal to sphere is always up (+z direction)
+            
+            mat t = arbitraryTangent(n);
+            vec r1 = n;    // Won't be used... since ground is static.
+            mat r2 = -n * spheres[s].radius(); 
+            Contact c = Contact(cID++, -3, s, n, t, r1, r2, psi);   // -3 is our special int for GROUND
+            Contacts[num_contacts++] = c;
+
+            spheres[s].ContactCount++; // Already made sure not static 
+            if (spheres[s].BodyIndex < 0) {
+                spheres[s].BodyIndex = bID++;
+                num_bodies++;
+            }
+        }
+    }
+    
+    
     ////////////////////////////////////////////////////////////////
     // Sphere-Sphere collision detection
     for (int s1=0; s1<num_spheres; s1++) {
@@ -59,7 +87,7 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
             double n_norm = norm(n,2);
             mat psi = zeros(1);  // 1x1 matrix
             psi(0) = n_norm -spheres[s2].radius() -spheres[s1].radius(); 
-            //if ( psi -spheres[s1].radius() <   // Bounding spheres should include the radii...
+            //if ( psi.at(0) -spheres[s1].radius() <   // Bounding spheres should include the radii...
             //        spheres[s1].bounding_radius()+spheres[s2].bounding_radius() ) {
                 n = n/n_norm; // Normalize normal
                 mat t = arbitraryTangent(n); 
@@ -85,27 +113,7 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
         }
     }
     
-//    ////////////////////////////////////////////////////////////////
-//    // Sphere-Ground collision detection
-//    for (int s = 0; s < num_spheres; s++) {
-//        if (!spheres[s].isStaticBody()) {
-//            mat psi = zeros(1);
-//            psi.at(0) = spheres[s].u().at(2) - spheres[s].radius(); // psi=height-radius
-//            mat n = zeros(3, 1);
-//            n.at(2) = -1.0; // Normal to ground is always down (-z direction)
-//            mat t = arbitraryTangent(n);
-//            vec r1 = n * spheres[s].radius();
-//            mat r2 = -n; // Won't be used... since ground is static.
-//            Contact c = Contact(cID++, s, 9999, n, t, r1, r2, psi);   // -3 is our special int for GROUND
-//            Contacts[num_contacts++] = c;
-//
-//            spheres[s].ContactCount++; // Already made sure not static 
-//            if (spheres[s].BodyIndex < 0) {
-//                spheres[s].BodyIndex = bID++;
-//                num_bodies++;
-//            }
-//        }
-//    }
+   
     
     
 }
