@@ -57,14 +57,41 @@ SimulationEnvironment::SimulationEnvironment(const SimulationEnvironment& orig) 
 SimulationEnvironment::~SimulationEnvironment() {
 }
 
-void menu1(int id) {
-    cout << "Menu 1" << endl;
+void menuMain(int id) {
+    cout << "Main Menu, " << id << endl;
 }
-void menu2(int id) {
-    cout << "Menu 2" << endl; 
+void menuAddObject(int objID) {
+    cout << "Add Object... [" << objID << "]" << endl; 
+    switch(objID) {
+        case 1:
+            cout << "Adding sphere" << endl;
+            break;
+        case 2: 
+            cout << "Adding tetrahedron" << endl;
+            break;
+        case 3: 
+            cout << "Adding cube (hexahedron)" << endl;
+            break;
+        case 4: 
+            cout << "Adding octahedron" << endl;
+            break;
+        case 5: 
+            cout << "Adding dodecahedron" << endl;
+            break;
+        case 6: 
+            cout << "Adding icosahedron" << endl;
+            break;
+            
+    }
+    
 }
-void menu3(int id) {
-    cout << "Menu 3" << endl; 
+
+void menuLighting(int id) {
+    cout << "Lighting" << endl;
+}
+
+void menuQuit(int id) {
+    cout << "Quitting..." << endl; 
 }
 
 // Routine to make the menu.
@@ -72,22 +99,26 @@ void makeMenu(void)
 {
    // The sub-menu is created first (because it should be visible when the top
    // menu is created): its callback function is registered and menu entries added.
-   int imenu1, imenu2, imenu3;
+   int imenuMain, imenuAdd, imenuQuit;
 
-   imenu1 = glutCreateMenu(menu1);
-   glutAddMenuEntry("Red", 2);
-   glutAddMenuEntry("Blue",3);
 
-   imenu2 = glutCreateMenu(menu2);
-   glutAddMenuEntry("Outlined",4); 
-   glutAddMenuEntry("Filled",5);  
+
+   imenuAdd = glutCreateMenu(menuAddObject);
+   glutAddMenuEntry("Sphere",1); 
+   glutAddMenuEntry("Tetrahedron",2);  
+   glutAddMenuEntry("Cube (hexahedron)",3);
+   glutAddMenuEntry("Octahedron",4);
+   glutAddMenuEntry("Dodecahedron",5);
+   glutAddMenuEntry("Icosahedron",6);
+   
+   imenuQuit = glutCreateMenu(menuQuit);
 
 
    // The top menu is created: its callback function is registered and menu entries,
    // including a submenu, added.
-   glutCreateMenu(menu1);
-   glutAddMenuEntry("Menu1",1);
-   glutAddSubMenu("Menu2", imenu2);
+   glutCreateMenu(menuMain);
+   glutAddSubMenu("Add Object", imenuAdd);
+   glutAddMenuEntry("Quit",imenuQuit);
 
    // The menu is attached to a mouse button.
    glutAttachMenu(GLUT_RIGHT_BUTTON);
@@ -100,8 +131,8 @@ void initializeGL(int argc, char **argv)
     // GLUT
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); 
-    glutInitWindowSize(500, 500);
-    glutInitWindowPosition(100, 100); 
+    glutInitWindowSize(1200, 800);
+    glutInitWindowPosition(300, 100); 
     glutCreateWindow("RPI - Simulator");
     glutDisplayFunc(drawScene); 
     glutReshapeFunc(resize);  
@@ -123,8 +154,9 @@ void initializeGL(int argc, char **argv)
 }
 
 void worldLighting() {
-    glClearColor(0.5f, 0.5f, 0.5f, 0.f);
-
+    //glClearColor(0.1529f, 0.1529f, 0.1529f, 1.f);   // Blender color
+    glClearColor(0.2529f, 0.2529f, 0.2529f, 0.f);
+    
     glEnable(GL_DEPTH_TEST); // Enable depth testing.
 
     // Turn on OpenGL lighting.
@@ -134,11 +166,13 @@ void worldLighting() {
     float lightAmb[] =         { 0.0, 0.0, 0.0, 1.0 };
     float lightDifAndSpec0[] = { 1.0, 1.0, 1.0, 1.0 };
     float globAmb[] =          { 0.2, 0.2, 0.2, 1.0 };
+    float lightPosition[] =    { 0.0, 0.0, -30.0, 1.0 };
 
     // Light0 properties.
     glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDifAndSpec0);
     glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec0);
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition); 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb); // Global ambient light.
     
     glEnable(GL_LIGHT0); // Enable particular light source.
@@ -158,7 +192,7 @@ void drawScene(void)
     
     worldLighting();
     
-    glColor3f(1.0, 1.0, 0.5);
+    glColor3f(1.0, 1.0, 0.5);     // Color of objects
     
 
     // Wire-frame or not

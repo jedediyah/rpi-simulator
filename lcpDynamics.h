@@ -25,7 +25,7 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
                  Body_trimesh *trimeshes, int &num_trimeshes, 
                  int &nb, int &nc, double &h) {
     
-    int nd = 0;  // Number of friction directions in discretized friction cone
+    int nd = 3;  // Number of friction directions in discretized friction cone
     
     /////////////////////////////////////
     // Initialize submatrices 
@@ -167,7 +167,7 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     } // Done with submatrices
     
     // Construct A, b, and solve LCP 
-    mat Minv = inv(M);                     // Use stored version instead...
+    mat Minv = inv(M);  
     mat MinvGn = Minv*Gn; //solve(M,Gn); 
     mat MinvGf = Minv*Gf; //solve(M,Gf);  
     mat MinvPext = Minv*FX*h; //solve(M, FX*h);  
