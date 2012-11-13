@@ -39,7 +39,7 @@ public:
     
     void setRun(bool r);
     bool isRunning();
-    void step(double dt);
+    void step();
     
     
 private:

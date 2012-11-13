@@ -61,64 +61,109 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     
     // Gn, U, and b
     int cID, body1id, body2id;  
-    mat r1, r2;
-    mat Gn_i1, Gn_i2, Gf_i1, Gf_i2;  
+    mat r1;
+    mat Gn_i1, Gf_i1;  
     mat d;
+    mat r2, Gn_i2, Gf_i2;  
     for (int i=0; i<nc; i++) {
-        cID = Contacts[i].contact_ID;  
         
-        r1 = Contacts[i].r1;
-        r2 = Contacts[i].r2; 
-        body1id = spheres[Contacts[i].body1].bodyIndex();
-        body2id = spheres[Contacts[i].body2].bodyIndex(); 
-        
-        // Gn
-        Gn_i1 = join_cols(-Contacts[i].normal, cross(r1,-Contacts[i].normal));
-        Gn_i2 = join_cols(Contacts[i].normal, cross(r2, Contacts[i].normal));
-        
-        if ( !spheres[Contacts[i].body1].isStaticBody() )
-            Gn.submat( span(6*body1id-6,6*body1id-1),span(cID,cID) ) = Gn_i1; 
-        if ( !spheres[Contacts[i].body2].isStaticBody() )
-            Gn.submat( span(6*body2id-6,6*body2id-1),span(cID,cID) ) = Gn_i2; 
-        
-        // Gf
-        if (nd > 0) {
-            Gf_i1 = zeros(6,nd);
-            Gf_i2 = zeros(6,nd); 
-            for (int j=0; j < nd; j++) {    // For each friction direction
-                d = rot(Contacts[i].normal, ((j-1)/nd)*(2*M_PI)) * Contacts[i].tangent; 
-                Gf_i1.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r1,d));
-                Gf_i2.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r2,d));
-                //Gf_i1.submat( span(6*body1id-6,6*body1id-1), span(nd*(cID+1)-nd,nd*(cID+1)) ) = join_cols( d , cross(r1,d)); 
-                //Gf_i2.submat( span(6*body2id-6,6*body2id-1), span(nd*(cID+1)-nd,nd*(cID+1)) ) =  
-            }
+        if (Contacts[i].body2 == 9999) { // GROUND VERSION
+            cID = Contacts[i].contact_ID;  
+            r1 = Contacts[i].r1;
+            body1id = spheres[Contacts[i].body1].bodyIndex();
+
+            // Gn
+            Gn_i1 = join_cols(-Contacts[i].normal, cross(r1,-Contacts[i].normal));
+
             if ( !spheres[Contacts[i].body1].isStaticBody() )
-                Gf.submat( span(6*body1id-6,6*body1id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i1;  // Need to double check these indices 
+                Gn.submat( span(6*body1id-6,6*body1id-1),span(cID,cID) ) = Gn_i1; 
+
+            // Gf
+            if (nd > 0) {
+                Gf_i1 = zeros(6,nd);
+                for (int j=0; j < nd; j++) {    // For each friction direction
+                    d = rot(Contacts[i].normal, ((j-1)/nd)*(2*M_PI)) * Contacts[i].tangent; 
+                    Gf_i1.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r1,d));
+                }
+                Gf_i1.print();
+                if ( !spheres[Contacts[i].body1].isStaticBody() ) {
+                    Gf.submat( span(6*body1id-6,6*body1id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i1;  // Need to double check these indices 
+                    Gf.print();
+                }
+            }
+
+            // With the MCP, this is where we would fill in a portion of b.  
+            // The following will make redundant assignments to NU & FX, but it's 
+            // for the best right now!  (Since we need PSI, and we're already looping)
+            if ( !spheres[Contacts[i].body1].isStaticBody() ) {
+                NU.submat( span(6*body1id-6,6*body1id-1), span(0,0) ) = spheres[Contacts[i].body1].nu(); 
+                FX.submat( span(6*body1id-6,6*body1id-1), span(0,0) ) = spheres[Contacts[i].body1].fext(); 
+            }
+
+            // U
+                 U.at(cID,cID) = 0.5 * 0.5 * spheres[Contacts[i].body1].mu();
+            PSI.at(cID) = Contacts[i].psi.at(0);  
+        }
+        
+        else {
+            cID = Contacts[i].contact_ID;  
+            r1 = Contacts[i].r1;
+            r2 = Contacts[i].r2; 
+            body1id = spheres[Contacts[i].body1].bodyIndex();
+            body2id = spheres[Contacts[i].body2].bodyIndex(); 
+
+            // Gn
+            Gn_i1 = join_cols(-Contacts[i].normal, cross(r1,-Contacts[i].normal));
+            Gn_i2 = join_cols(Contacts[i].normal, cross(r2, Contacts[i].normal));
+
+            if ( !spheres[Contacts[i].body1].isStaticBody() )
+                Gn.submat( span(6*body1id-6,6*body1id-1),span(cID,cID) ) = Gn_i1; 
             if ( !spheres[Contacts[i].body2].isStaticBody() )
-                Gf.submat( span(6*body2id-6,6*body2id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i2; 
+                Gn.submat( span(6*body2id-6,6*body2id-1),span(cID,cID) ) = Gn_i2; 
+
+            // Gf
+            if (nd > 0) {
+                Gf_i1 = zeros(6,nd);
+                Gf_i2 = zeros(6,nd); 
+                for (int j=0; j < nd; j++) {    // For each friction direction
+                    d = rot(Contacts[i].normal, ((j-1)/nd)*(2*M_PI)) * Contacts[i].tangent; 
+                    Gf_i1.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r1,d));
+                    Gf_i2.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r2,d));
+                }
+                Gf_i1.print();
+                Gf_i2.print();
+                if ( !spheres[Contacts[i].body1].isStaticBody() )
+                    Gf.submat( span(6*body1id-6,6*body1id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i1;  // Need to double check these indices 
+                if ( !spheres[Contacts[i].body2].isStaticBody() )
+                    Gf.submat( span(6*body2id-6,6*body2id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i2; 
+                Gf.print();
+            }
+
+            // With the MCP, this is where we would fill in a portion of b.  
+            // The following will make redundant assignments to NU & FX, but it's 
+            // for the best right now!  (Since we need PSI, and we're already looping)
+            if ( !spheres[Contacts[i].body1].isStaticBody() ) {
+                NU.submat( span(6*body1id-6,6*body1id-1), span(0,0) ) = spheres[Contacts[i].body1].nu(); 
+                FX.submat( span(6*body1id-6,6*body1id-1), span(0,0) ) = spheres[Contacts[i].body1].fext(); 
+            }
+
+            if ( !spheres[Contacts[i].body2].isStaticBody() ) {
+                NU.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = spheres[Contacts[i].body2].nu(); 
+                FX.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = spheres[Contacts[i].body2].fext();
+            }
+
+            // U
+                 U.at(cID,cID) = 0.5 * spheres[Contacts[i].body1].mu() * spheres[Contacts[i].body2].mu();
+            PSI.at(cID) = Contacts[i].psi.at(0);
         }
         
-        // With the MCP, this is where we would fill in a portion of b.  
-        // The following will make redundant assignments to NU & FX, but it's 
-        // for the best right now!  (Since we need PSI, and we're already looping)
-        if ( !spheres[Contacts[i].body1].isStaticBody() ) {
-            NU.submat( span(6*body1id-6,6*body1id-1), span(0,0) ) = spheres[Contacts[i].body1].nu(); 
-            FX.submat( span(6*body1id-6,6*body1id-1), span(0,0) ) = spheres[Contacts[i].body1].fext(); 
-        }
-            
-        if ( !spheres[Contacts[i].body2].isStaticBody() ) {
-            NU.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = spheres[Contacts[i].body2].nu(); 
-            FX.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = spheres[Contacts[i].body2].fext();
-        }
         
-        // U
-        U.at(cID,cID) = 0.5 * spheres[Contacts[i].body1].mu() * spheres[Contacts[i].body2].mu();
-        PSI.at(cID) = Contacts[i].psi.at(0);  
+        
     } // Done with submatrices
     
     
     // Construct A, b, and solve LCP 
-    mat Minv = inv(M);  
+    mat Minv = inv(M);                     
     mat MinvGn = Minv*Gn; //solve(M,Gn); 
     mat MinvGf = Minv*Gf; //solve(M,Gf);  
     mat MinvPext = Minv*FX*h; //solve(M, FX*h);  
@@ -149,7 +194,28 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     double dparamLCP[1] = {10e-5}; 
     
     lcp_nsqp(&nn,AA,bb,z0,w,&info,&iparamLCP,dparamLCP);        // Solve LCP 
-    
+    switch(info) {
+        case 0:
+            cout << "LCP: Converged" << endl; 
+            break;
+        case 1: 
+            cout << "LCP: Too many iterations" << endl;
+            break;
+        case 2: 
+            cout << "LCP: Accuracy insufficient to satisfy convergence criterion" << endl;
+            break;
+        case 5: 
+            cout << "LCP: Length of working array insufficient" << endl;
+            break;
+        default:
+            cout << "LCP: The constraints are inconsistent" << endl; 
+            
+    }
+// *                0 : convergence  / minimization sucessfull\n
+// *                1 : Too Many iterations\n
+// * 	            2 : Accuracy insuficient to satisfy convergence criterion\n
+// *                5 : Length of working array insufficient\n
+// *                Other : The constraints are inconstent\n
     
     // Compute the result, to pass back to simulation
     vec Pn = zeros(nc);
@@ -158,7 +224,12 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
         Pn.at(i) = z0[i]; 
     for (int i=nc; i<nc+nd*nc; i++)
         Pf.at(i) = z0[i]; 
-    return NU + MinvGn*Pn + MinvGf*Pf + MinvPext;  // RESULT
+    
+    vec RESULT =  NU + MinvGn*Pn + MinvGf*Pf + MinvPext;  // RESULT
+    FX.print();
+    cout << endl;
+    RESULT.print();
+    return RESULT; 
     
 }
 
