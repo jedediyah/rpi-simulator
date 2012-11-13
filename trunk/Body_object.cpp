@@ -22,7 +22,7 @@ Body_object::Body_object() {
     U = zeros<vec>(3); 
     Quat = zeros<vec>(4); Quat(0) = 1.0; 
     Nu = zeros<vec>(6);
-    Fext = zeros<vec>(6); 
+    Fext = zeros<vec>(6);                Fext.at(2) = -9.8; // Fake gravity!!!
     Aext = zeros<vec>(6); 
     Mu = 0.5; 
     IsStaticBody = 0; 

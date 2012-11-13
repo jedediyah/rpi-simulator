@@ -18,10 +18,11 @@
 
 
 // Global variables
-static GLsizei width, height; // OpenGL window size.
-static Simulation SIM;  // Instance of simulator
+static GLsizei width, height;   // OpenGL window size.
+static Simulation SIM;          // Instance of simulator
 static pthread_t simThread; 
 static int rc; 
+static bool wireframe = false; 
 
 double Camera[3]; 
 double CamInit[3];
@@ -31,7 +32,7 @@ double camRXp, camRYp;
 double camXi, camYi;
 
 // STATIC methods
-void setup(); 
+void makeMenu(void);
 void run();
 void drawScene(); 
 void resize(int w, int h);  
@@ -56,6 +57,42 @@ SimulationEnvironment::SimulationEnvironment(const SimulationEnvironment& orig) 
 SimulationEnvironment::~SimulationEnvironment() {
 }
 
+void menu1(int id) {
+    cout << "Menu 1" << endl;
+}
+void menu2(int id) {
+    cout << "Menu 2" << endl; 
+}
+void menu3(int id) {
+    cout << "Menu 3" << endl; 
+}
+
+// Routine to make the menu.
+void makeMenu(void)
+{
+   // The sub-menu is created first (because it should be visible when the top
+   // menu is created): its callback function is registered and menu entries added.
+   int imenu1, imenu2, imenu3;
+
+   imenu1 = glutCreateMenu(menu1);
+   glutAddMenuEntry("Red", 2);
+   glutAddMenuEntry("Blue",3);
+
+   imenu2 = glutCreateMenu(menu2);
+   glutAddMenuEntry("Outlined",4); 
+   glutAddMenuEntry("Filled",5);  
+
+
+   // The top menu is created: its callback function is registered and menu entries,
+   // including a submenu, added.
+   glutCreateMenu(menu1);
+   glutAddMenuEntry("Menu1",1);
+   glutAddSubMenu("Menu2", imenu2);
+
+   // The menu is attached to a mouse button.
+   glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
 void initializeGL(int argc, char **argv)
 {
     cout << "Initializing GL." << endl;
@@ -66,14 +103,12 @@ void initializeGL(int argc, char **argv)
     glutInitWindowSize(500, 500);
     glutInitWindowPosition(100, 100); 
     glutCreateWindow("RPI - Simulator");
-    setup(); 
     glutDisplayFunc(drawScene); 
     glutReshapeFunc(resize);  
     glutKeyboardFunc(keyInput);
+    makeMenu(); 
     
-    //glutKeyboardFunc(keyPressed); 
-    
-    CamInit[0]=0;           CamInit[1]=0;           CamInit[2]=20;
+    CamInit[0]=0;           CamInit[1]=0;           CamInit[2]=-20;
     Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2];  
     
     worldLighting(); 
@@ -125,7 +160,7 @@ void drawScene(void)
     
     glColor3f(1.0, 1.0, 0.5);
     
-    bool wireframe = false; 
+
     // Wire-frame or not
     if (wireframe)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -144,11 +179,6 @@ void drawScene(void)
     glFlush(); 
 }
 
-// Initialization routine.
-void setup(void) 
-{
-   glClearColor(1.0, 1.0, 1.0, 0.0);  
-}
 
 // OpenGL window reshape routine.
 void resize(int width, int height)
@@ -162,8 +192,8 @@ void resize(int width, int height)
 
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   glOrtho(-20.0, 20.0, -20.0, 20.0, -100.0, 100.0);
-   //gluPerspective(50, width/height, 1, 100);
+   //glOrtho(-20.0, 20.0, -20.0, 20.0, -100.0, 100.0);
+   gluPerspective(70, width/height, 0.1, 100);
    
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
@@ -184,7 +214,7 @@ void *runSim(void *threadid)
    
    cout << "Starting SIM... " << endl;
    while(SIM.isRunning()) {
-        SIM.step(0.01);
+        SIM.step();
         cout << "Stepping ..." << endl;
         //drawScene(); 
     }
@@ -212,8 +242,8 @@ void keyInput(unsigned char key, int x, int y)
 //                   cout << "Error:unable to create thread," << rc << endl;
 //                   exit(-1);
 //                }
-               for (int i=0; i<10; i++) {
-                   SIM.step(0.01);
+               for (int i=0; i<10; i++) {   // Runs a certain number of times
+                   SIM.step();
                    drawScene();
                }
            }
@@ -224,6 +254,10 @@ void keyInput(unsigned char key, int x, int y)
            break;
        case 112: // p
            SIM.printBodies(); 
+           break;
+       case 9: // [tab]
+           wireframe = !wireframe; 
+           drawScene();
            break;
            
        case 113: // q

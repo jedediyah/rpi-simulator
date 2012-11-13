@@ -109,20 +109,21 @@ void Simulation::addSphere() {
     Body_sphere sphere = Body_sphere();
     
     if ( Num_Spheres == 1 ) {
-        sphere.setPosition(-13., 3., 0.0);
+        sphere.setPosition(-13., 3., 1.2);
         sphere.setName("s2"); 
         sphere.setQuaternion(.0707, .2666, .5332, .7998);
     }
     else if (Num_Spheres == 2 ) {
         sphere.setRadius(2.0);
-        sphere.setPosition(5,2,0);
+        sphere.setPosition(5,2,2.5);
         sphere.setName("s3"); 
-        sphere.setVelocity(0,2,0,0,0,0);
+        //sphere.setVelocity(0,2,0,0,0,0);
+        //sphere.setStatic(true); 
     }
     else {
-        sphere.setPosition(-14,-5,0.0);
+        sphere.setPosition(-14,-5,4.0);
         sphere.setRadius(3.0);
-        sphere.setVelocity(0,0,0,0,.3,0);
+        //sphere.setVelocity(0,0,0,0,.3,0);
         sphere.setName("s1"); 
     }
     
@@ -136,7 +137,7 @@ void Simulation::setRun(bool r) {
 
 bool Simulation::isRunning() { return running; }
 
-void Simulation::step(double dt) {  // dt is now step_size...
+void Simulation::step() {  // dt is now step_size...
     
     // Collision detection 
     CD.findCollisions(Contacts, num_bodies, num_contacts, num_subcontacts, Sphere_Bodies, Num_Spheres); 
