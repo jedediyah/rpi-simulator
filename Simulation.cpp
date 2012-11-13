@@ -123,7 +123,7 @@ void Simulation::addSphere() {
     else {
         sphere.setPosition(-14,-5,4.0);
         sphere.setRadius(3.0);
-        //sphere.setVelocity(0,0,0,0,.3,0);
+        sphere.setVelocity(1,0,0,0,0,0);
         sphere.setName("s1"); 
     }
     

@@ -18,6 +18,8 @@
 Body_sphere::Body_sphere() {
     Body_object::set_body_type("sphere");
     Radius = 1.0; 
+    updateMassInertia(); 
+    Mu = 0.5; 
 }
 
 Body_sphere::Body_sphere(const Body_sphere& orig) {
@@ -30,7 +32,19 @@ Body_sphere::~Body_sphere() {
 double Body_sphere::radius() { return Radius; }
 
 // Set methods
-void Body_sphere::setRadius(double r) { Radius = r; }
+void Body_sphere::setRadius(double r) { 
+    Radius = r; 
+    updateMassInertia(); 
+}
+
+void Body_sphere::updateMassInertia() {
+    Mass_Matrix = eye(3,3)*Mass; 
+    Mass_Inverse_Matrix = inv(Mass_Matrix); 
+    Inertia_Matrix = (2./5.)*Mass*Radius*Radius*eye(3,3);  
+    Mass_Inertia_Matrix = zeros(6,6);  
+    Mass_Inertia_Matrix(span(0,2),span(0,2)) = Mass_Matrix;
+    Mass_Inertia_Matrix(span(3,5),span(3,5)) = Inertia_Matrix;   
+}
 
 void Body_sphere::drawSphere() {
     int i, j;
