@@ -9,6 +9,12 @@
 #include "cdaDynamics.h"
 #include "lcpDynamics.h"
 
+#ifdef __APPLE__
+#  include <GLUT/glut.h>
+#else
+#  include <GL/glut.h>
+#endif
+
 const char PATH_LICENSE[] = "2391033789&Courtesy_License&&&USR&2010&7_1_2010&1000&PATH&GEN&31_12_2010&0_0_0&0&0_0";
 
 Simulation::Simulation() {
@@ -31,16 +37,32 @@ Simulation::~Simulation() {
 //SimulationEnvironment Simulation::parent() { return PARENT; }
 
 void Simulation::printBodies() {
+    
+    glShadeModel(GL_FLAT);   // ?
     for (int i=0; i<Num_Trimeshes; i++) { // Draw all Trimeshes
         Trimesh_Bodies[i].print(); 
     }
     
+    glShadeModel(GL_SMOOTH);
     for (int i=0; i<Num_Spheres; i++) {   // Draw all Spheres
         Sphere_Bodies[i].print();
     }
 }
 
 void Simulation::draw(bool wireframe) { 
+    
+    // Material property vectors.
+    float matAmb[] = {0.0, 0.0, 1.0, 1.0};
+    float matDif[] = {0.0, 0.0, 1.0, 1.0};
+    float matSpec[] = { 1.0, 1.0, 1.0, 1.0 };
+    float matShine[] = { 50.0 };
+    float matEmission[] = {0.0, 0.0, 0.0, 1.0};
+       // Material properties.
+    glMaterialfv(GL_FRONT, GL_AMBIENT, matAmb);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, matDif);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
+    glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
+    glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
     
     for (int i=0; i<Num_Trimeshes; i++) { // Draw all Trimeshes
         Trimesh_Bodies[i].draw();

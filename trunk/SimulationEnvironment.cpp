@@ -6,6 +6,7 @@
  */
 
 #include "SimulationEnvironment.h"
+
 #include <cmath>
 //#include <boost/thread.hpp>
 #include <pthread.h>
@@ -27,9 +28,10 @@ static bool wireframe = false;
 double Camera[3]; 
 double CamInit[3];
 double CamXrot;
-double CamYrot; 
+double CamZrot; 
 double camRXp, camRYp; 
 double camXi, camYi;
+double camZoomFactor = 1.0;  // Change of 10% every zoom
 
 // STATIC methods
 void makeMenu(void);
@@ -39,6 +41,10 @@ void resize(int w, int h);
 void keyInput(unsigned char key, int x, int y);
 void initializeGL(int argc, char **argv); 
 void worldLighting();
+void mousePressEvent(int button, int state, int x, int y);
+void mouseMoveEvent(int x, int y);
+void updateCameraPosition();
+void mousePassiveMoveEvent(int x, int y);
 
 using namespace std;
 //using namespace boost; 
@@ -47,7 +53,6 @@ using namespace std;
 SimulationEnvironment::SimulationEnvironment(int argc, char **argv) {
  
     initializeGL( argc, argv );
-    //SIM.setParent(this); 
     
 }
 
@@ -102,7 +107,6 @@ void makeMenu(void)
    int imenuMain, imenuAdd, imenuQuit;
 
 
-
    imenuAdd = glutCreateMenu(menuAddObject);
    glutAddMenuEntry("Sphere",1); 
    glutAddMenuEntry("Tetrahedron",2);  
@@ -136,44 +140,88 @@ void initializeGL(int argc, char **argv)
     glutCreateWindow("RPI - Simulator");
     glutDisplayFunc(drawScene); 
     glutReshapeFunc(resize);  
-    glutKeyboardFunc(keyInput);
+    glutKeyboardFunc(keyInput);                 // Keyboard input
+    glutMouseFunc(mousePressEvent);             // Mouse press
+    glutMotionFunc(mouseMoveEvent);             // Active mouse motion
+    glutPassiveMotionFunc(mousePassiveMoveEvent);      // Passive mouse motion
+    
+    glEnable(GL_DEPTH_TEST); // Enable depth testing.
+    
     makeMenu(); 
     
-    CamInit[0]=0;           CamInit[1]=0;           CamInit[2]=-20;
-    Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2];  
-    
-    worldLighting(); 
-    
-    SIM.addCube();      // TODO
-    SIM.addCube();
-    SIM.addSphere();
-    SIM.addSphere();
-    SIM.addSphere();
+    CamInit[0]=0;           CamInit[1]=-34.641;           CamInit[2]=30;
+    Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2]; 
     
     drawScene();
+    
+    
+//    SIM.addCube();      // TODO
+//    SIM.addCube();
+    SIM.addSphere();
+    SIM.addSphere();
+    SIM.addSphere();
+    
+}
+
+// draws a 10x10 grid at Z=0, centered at the origin (x,y) = (0,0) 
+void drawGrid() {
+    cout << "GRID" << endl;
+    glDisable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL); 
+    
+    // Let's draw the world coordinate vectors...
+    //glutWireSphere(0.1,8,8);
+    glColor3f(1.0,0.0,0.0);             // X VECTOR
+    glBegin(GL_LINES);
+        glVertex3f(0.0,0.0,0.0);
+        glVertex3f(1.0,0.0,0.0);
+    glEnd();
+    glColor3f(0.0,1.0,0.0);             // Y VECTOR
+    glBegin(GL_LINES);
+        glVertex3f(0.0,0.0,0.0);
+        glVertex3f(0.0,1.0,0.0);
+    glEnd();
+    glColor3f(0.0,0.0,1.0);             // Z VECTOR
+    glBegin(GL_LINES);
+        glVertex3f(0.0,0.0,0.0);
+        glVertex3f(0.0,0.0,1.0);
+    glEnd();
+    
+    glColor3f(0.5,0.5,0.5);     // Line color
+    
+    
+    double xmin = -5; 
+    double xmax =  5;
+    double ymin = -5; 
+    double ymax =  5;
+    
+    for (double r=-5; r<=5; r++) {
+        // Draw a line from 
+    }
+    
+    glDisable(GL_COLOR_MATERIAL); 
+    glEnable(GL_LIGHTING);
 }
 
 void worldLighting() {
     //glClearColor(0.1529f, 0.1529f, 0.1529f, 1.f);   // Blender color
     glClearColor(0.2529f, 0.2529f, 0.2529f, 0.f);
     
-    glEnable(GL_DEPTH_TEST); // Enable depth testing.
-
     // Turn on OpenGL lighting.
     glEnable(GL_LIGHTING);
 
     // Light property vectors.
-    float lightAmb[] =         { 0.0, 0.0, 0.0, 1.0 };
-    float lightDifAndSpec0[] = { 1.0, 1.0, 1.0, 1.0 };
-    float globAmb[] =          { 0.2, 0.2, 0.2, 1.0 };
-    float lightPosition[] =    { 0.0, 0.0, -30.0, 1.0 };
+    float lightAmb0[] =         { 0.5, 0.5, 0.5, 1.0 };
+    float lightDifAndSpec0[] =  { 0.5, 0.5, 0.5, 1.0 };
+    float globAmb0[] =          { 0.2, 0.2, 0.2, 1.0 };
+    float lightPos0[] =    { 0.0, 0.0, -30.0, 1.0 };
 
     // Light0 properties.
-    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb0);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDifAndSpec0);
     glLightfv(GL_LIGHT0, GL_SPECULAR, lightDifAndSpec0);
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition); 
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb); // Global ambient light.
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPos0); 
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, globAmb0); // Global ambient light.
     
     glEnable(GL_LIGHT0); // Enable particular light source.
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE); // Enable local viewpoint
@@ -182,18 +230,22 @@ void worldLighting() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     
+    // Draw sphere at light
+    glDisable(GL_LIGHTING);
+    glPushMatrix();
+        glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
+        glTranslatef(lightPos0[0], lightPos0[1], lightPos0[2]);
+        glColor3f(0.0, 1.0, 0.0); 
+        glutWireSphere(0.05, 8, 8);
+    glPopMatrix();
+    glEnable(GL_LIGHTING);
 }
 
 // Drawing routine.
 void drawScene(void)
 {  
-    //cout << " DRAWING " << endl;
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    worldLighting();
-    
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clear
     glColor3f(1.0, 1.0, 0.5);     // Color of objects
-    
 
     // Wire-frame or not
     if (wireframe)
@@ -206,9 +258,11 @@ void drawScene(void)
     glLoadIdentity();
     gluLookAt(Camera[0],Camera[1],Camera[2],  // Camera position
               0,0,0,   // Look at center 
-              0,1,0);  // Y-direction is up
-    
-    SIM.draw(wireframe);
+              0,0,1);  // Y-direction is up
+        
+    worldLighting();            // Lighting
+    drawGrid();                 // Grid
+    SIM.draw(wireframe);        // Simulation objects
     
     glFlush(); 
 }
@@ -220,14 +274,14 @@ void resize(int width, int height)
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     int side = min(width, height);
-    glViewport((width - side) / 2, (height - side) / 2, side, side);
-
+    //glViewport((width - side) / 2, (height - side) / 2, side, side);
+    
    // glViewport(0, 0, width, height);
 
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
    //glOrtho(-20.0, 20.0, -20.0, 20.0, -100.0, 100.0);
-   gluPerspective(70, width/height, 0.1, 100);
+   gluPerspective(60, width/height, 0.1, 500);
    
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
@@ -244,7 +298,7 @@ void *runSim(void *threadid)
     
    long tid;
    tid = (long)threadid;
-   cout << "Hello World! Thread ID, " << tid << endl;
+   cout << "New thread.  Thread ID, " << tid << endl;
    
    cout << "Starting SIM... " << endl;
    while(SIM.isRunning()) {
@@ -306,9 +360,89 @@ void keyInput(unsigned char key, int x, int y)
 }
 
 
+void mousePressEvent(int button, int state, int x, int y)
+{
+  //process mouse events for rotate/move inside 3D scene
+    cout << "Mouse Press" << endl;
+    cout << "Button: " << button << endl; 
+    cout << "State: " << state << endl; 
+    
+    if (button == 0) {
+        camRXp = CamXrot;
+        camRYp = CamZrot;
+        camXi = x;
+        camYi = y;
+        cout << "Starting rotation with (" << camRXp << ", " << camRYp << ")" << endl;
+    }
+    else if (button == 3) {
+        cout << "Zoom in " << endl;
+        // Update camera position
+        camZoomFactor *= 0.9;   // Zoom
+        updateCameraPosition(); // Update camera position 
+        drawScene();            // Redraw from new camera position 
+    }
+    else if (button == 4) {
+        cout << "Zoom out " << endl; 
+        // Update camera position
+        camZoomFactor *= 1.1;   // Zoom
+        updateCameraPosition(); // Update camera position 
+        drawScene();            // Redraw from new camera position 
+    }
+}
+
+void mouseMoveEvent(int x, int z)
+{
+ //process keyboard events
+    cout << "Mouse Event" << endl; 
+    cout << "   dX = " << x-camXi << ",   dZ = " << camYi-z << endl;  
+     
+    double rotScale = 0.01;
+    CamXrot = camRXp + (camYi-z)*rotScale; 
+    CamZrot = camRYp + (camXi-x)*rotScale; 
+    
+    updateCameraPosition();  
+}
+
+void updateCameraPosition() {
+    cout << "Updating rotation (" << CamXrot << ", " << CamZrot << ")" << endl;
+    
+    mat Rx = zeros(3,3);  // Init rotation matrices
+    mat Rz = zeros(3,3);
+    
+    Rx(0,0) = 1;
+    Rx(1,1) = cos(CamXrot); 
+    Rx(2,2) = cos(CamXrot);
+    Rx(1,2) = -sin(CamXrot);
+    Rx(2,1) = sin(CamXrot);
+    Rx.print();
+    
+    Rz(2,2) = 1;
+    Rz(0,0) = cos(CamZrot);
+    Rz(1,1) = cos(CamZrot);
+    Rz(0,1) = -sin(CamZrot);
+    Rz(1,0) = sin(CamZrot); 
+    
+    mat zi = zeros(3,1);
+    zi(0,0) = CamInit[0] * camZoomFactor;
+    zi(1,0) = CamInit[1] * camZoomFactor;
+    zi(2,0) = CamInit[2] * camZoomFactor; 
+    
+    mat r = Rz*Rx*zi;   
+    Camera[0] = r(0);
+    Camera[1] = r(1);
+    Camera[2] = r(2); 
+    
+    drawScene();
+}
+
+void mousePassiveMoveEvent(int x, int y) {
+    //cout << "Passive Move " << x << ", " << y << endl;
+}
+
+
 // Main method 
 int SimulationEnvironment::start() {
-   glutMainLoop(); 
-   return 0;  
+    glutMainLoop(); 
+    return 0;  
 }
 

@@ -86,18 +86,18 @@ void Body_sphere::draw(bool wireframe) {
     //glDisable(GL_LIGHTING); 
     
     // Material property vectors.
-    float matAmb[] = {0.0, 0.0, 0.5, 1.0};
-    float matDif[] = {0.0, 0.0, 0.5, 1.0};
-    float matSpec[] = { 0.5, 0.5, 0.5, 1.0 };
-    float matShine[] = { 50.0 };
-    float matEmission[] = {0.0, 0.0, 0.0, 1.0};
-
-    // Material properties of sphere.
-    glMaterialfv(GL_FRONT, GL_AMBIENT, matAmb);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, matDif);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
-    glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
-    glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
+//    float matAmb[] = {0.0, 0.0, 0.5, 1.0};
+//    float matDif[] = {0.0, 0.0, 0.5, 1.0};
+//    float matSpec[] = { 0.5, 0.5, 0.5, 1.0 };
+//    float matShine[] = { 50.0 };
+//    float matEmission[] = {0.0, 0.0, 0.0, 1.0};
+//
+//    // Material properties of sphere.
+//    glMaterialfv(GL_FRONT, GL_AMBIENT, matAmb);
+//    glMaterialfv(GL_FRONT, GL_DIFFUSE, matDif);
+//    glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
+//    glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
+//    glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
     
     
     glPushMatrix();
