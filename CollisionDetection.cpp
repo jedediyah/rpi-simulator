@@ -52,7 +52,7 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
     
     
      ////////////////////////////////////////////////////////////////
-    // Sphere-Ground collision detection
+    // SPHERE-GROUND collision detection
 //    for (int s = 0; s < num_spheres; s++) {
 //        if (!spheres[s].isStaticBody()) {
 //            mat psi = zeros(1);
@@ -76,7 +76,11 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
     
     
     ////////////////////////////////////////////////////////////////
-    // Sphere-Sphere collision detection
+    // MESH-GROUND collision detection
+    
+    
+    ////////////////////////////////////////////////////////////////
+    // SPHERE-SPHERE collision detection
     for (int s1=0; s1<num_spheres; s1++) {
         for (int s2=s1+1; s2<num_spheres; s2++) {
             if ( spheres[s1].isStaticBody() && spheres[s2].isStaticBody() )
@@ -112,6 +116,11 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
             //}
         }
     }
+    
+    
+    ////////////////////////////////////////////////////////////////
+    // SPHERE-MESH collision detection
+    
     
    
     
