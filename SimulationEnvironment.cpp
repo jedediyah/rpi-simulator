@@ -161,7 +161,7 @@ void initializeGL(int argc, char **argv)
 //    SIM.addCube();
     SIM.addSphere();
     SIM.addSphere();
-//    SIM.addSphere();
+    SIM.addSphere();
     
 }
 

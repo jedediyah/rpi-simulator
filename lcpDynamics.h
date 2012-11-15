@@ -25,7 +25,7 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
                  Body_trimesh *trimeshes, int &num_trimeshes, 
                  int &nb, int &nc, double &h) {
     
-    int nd = 0;  // Number of friction directions in discretized friction cone
+    int nd = 5;  // Number of friction directions in discretized friction cone
     
     /////////////////////////////////////
     // Initialize submatrices 
@@ -167,7 +167,7 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     } // Done with submatrices
     
     // Construct A, b, and solve LCP 
-    mat Minv = inv(M);  
+    mat Minv = inv(M);    
     mat MinvGn = Minv*Gn; //solve(M,Gn); 
     mat MinvGf = Minv*Gf; //solve(M,Gf);  
     mat MinvPext = Minv*FX*h; //solve(M, FX*h);  
@@ -198,7 +198,7 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     double w[nn];
     int info;
     int iparamLCP;
-    double dparamLCP[1] = {10e-5}; 
+    double dparamLCP[1] = {10e-8}; 
     
     lcp_nsqp(&nn,AA,bb,z0,w,&info,&iparamLCP,dparamLCP);        // Solve LCP 
     switch(info) {
@@ -230,14 +230,15 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     for (int i=0; i<nc; i++)
         Pn.at(i) = z0[i]; 
     for (int i=nc; i<nc+nd*nc; i++)
-        Pf.at(i) = z0[i]; 
+        Pf.at(i-nc) = z0[i]; 
     
     vec RESULT =  NU + MinvGn*Pn + MinvGf*Pf + MinvPext;  // RESULT
     
-    cout << "FX:" << endl; FX.print();
-    cout << "b: " << endl; b.print(); 
+    //cout << "z0:" << endl; for (int i=0; i<nc+nd*nc; i++) cout << z0[i]; 
+    cout << "Pn: " << endl; Pn.print();
+    cout << "Pf: " << endl; Pf.print();
+    cout << "NUnu: " << endl; RESULT.print(); 
     
-    cout << "Resutl:"  << endl; RESULT.print();
 
     return RESULT; 
     

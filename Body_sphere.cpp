@@ -105,7 +105,7 @@ void Body_sphere::draw(bool wireframe) {
 
         //cout << Body_object::name() << ": " << a <<","<<x<<","<<y<<","<<z<< endl; 
 
-        glRotatef(a * 57.2958, x, y, z); // Rotation     
+        glRotatef(-a * 57.2958, x, y, z); // Rotation     
 
         if (wireframe)
             glutWireSphere(Radius, 10, 10);
