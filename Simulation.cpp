@@ -143,8 +143,8 @@ void Simulation::addSphere() {
         //sphere.setStatic(true); 
     }
     else {
-        sphere.setPosition(-14,-5,4.0);
-        sphere.setRadius(3.0);
+//        sphere.setPosition(-14,-5,4.0);
+//        sphere.setRadius(3.0);
         sphere.setVelocity(1,0,0,0,0,0);
         sphere.setName("s1"); 
     }
