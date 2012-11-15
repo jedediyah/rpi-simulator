@@ -32,6 +32,7 @@ double CamZrot;
 double camRXp, camRYp; 
 double camXi, camYi;
 double camZoomFactor = 1.0;  // Change of 10% every zoom
+double gridColor[] = {0.5, 0.5, 0.5};
 
 // STATIC methods
 void makeMenu(void);
@@ -135,7 +136,7 @@ void initializeGL(int argc, char **argv)
     // GLUT
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); 
-    glutInitWindowSize(1200, 800);
+    glutInitWindowSize(900, 900);
     glutInitWindowPosition(300, 100); 
     glutCreateWindow("RPI - Simulator");
     glutDisplayFunc(drawScene); 
@@ -149,7 +150,8 @@ void initializeGL(int argc, char **argv)
     
     makeMenu(); 
     
-    CamInit[0]=0;           CamInit[1]=-34.641;           CamInit[2]=30;
+    //CamInit[0]=-20;           CamInit[1]=-34.641;           CamInit[2]=30;
+    CamInit[0]=-10.0;           CamInit[1]=-14.3205;           CamInit[2]=12.0;
     Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2]; 
     
     drawScene();
@@ -158,46 +160,96 @@ void initializeGL(int argc, char **argv)
 //    SIM.addCube();      // TODO
 //    SIM.addCube();
     SIM.addSphere();
-    SIM.addSphere();
-    SIM.addSphere();
+//    SIM.addSphere();
+//    SIM.addSphere();
     
 }
 
 // draws a 10x10 grid at Z=0, centered at the origin (x,y) = (0,0) 
 void drawGrid() {
-    cout << "GRID" << endl;
+    //cout << "GRID" << endl;
     glDisable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL); 
     
-    // Let's draw the world coordinate vectors...
-    //glutWireSphere(0.1,8,8);
-    glColor3f(1.0,0.0,0.0);             // X VECTOR
-    glBegin(GL_LINES);
-        glVertex3f(0.0,0.0,0.0);
-        glVertex3f(1.0,0.0,0.0);
-    glEnd();
-    glColor3f(0.0,1.0,0.0);             // Y VECTOR
-    glBegin(GL_LINES);
-        glVertex3f(0.0,0.0,0.0);
-        glVertex3f(0.0,1.0,0.0);
-    glEnd();
+    glEnable (GL_LINE_SMOOTH);          // TODO: Can go to INIT
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE);
+    
+    
+    glColor3f(gridColor[0],gridColor[1],gridColor[2]);
+    double xmin = -5.0; 
+    double xmax =  5.0;
+    double ymin = -5.0; 
+    double ymax =  5.0;
+        // Grid rows.
+        for (double y=ymin; y<=-1.0; y++) {     // Bottom rows
+            glBegin(GL_LINES);
+                glVertex3f(xmin,y,0.0);
+                glVertex3f(xmax,y,0.0);
+            glEnd();
+        }
+        glBegin(GL_LINES);                       // Middle row 
+            glVertex3f(xmin,0.0,0.0);
+            glVertex3f(0.0,0.0,0.0);
+        glEnd();
+        glLineWidth(2.0);
+        glColor3f(1.0,0.0,0.0);
+        glBegin(GL_LINES);
+            glVertex3f(0.0,0.0,0.0);
+            glVertex3f(1.0,0.0,0.0);
+        glEnd();
+        glLineWidth(1.0);
+        glColor3f(gridColor[0],gridColor[1],gridColor[2]); 
+        glBegin(GL_LINES);
+            glVertex3f(1.0,0.0,0.0);
+            glVertex3f(xmax,0.0,0.0);
+        glEnd();
+        for (double y=1.0; y<=ymax; y++) {       // Top rows
+            glBegin(GL_LINES);
+                glVertex3f(xmin,y,0.0);
+                glVertex3f(xmax,y,0.0);
+            glEnd();
+        }
+        
+        // Grid columns.
+        for (double x=xmin; x<=-1.0; x++) {     // Bottom columns
+            glBegin(GL_LINES);
+                glVertex3f(x,ymin,0.0);
+                glVertex3f(x,ymax,0.0);
+            glEnd();
+        }
+        glBegin(GL_LINES);                      // Middle column
+            glVertex3f(0.0,ymin,0.0);
+            glVertex3f(0.0,0.0,0.0);
+        glEnd();
+        glLineWidth(2.0);
+        glColor3f(0.0,1.0,0.0);
+        glBegin(GL_LINES);
+            glVertex3f(0.0,0.0,0.0);
+            glVertex3f(0.0,1.0,0.0);
+        glEnd();
+        glLineWidth(1.0);
+        glColor3f(gridColor[0],gridColor[1],gridColor[2]); 
+        glBegin(GL_LINES);
+            glVertex3f(0.0,1.0,0.0);
+            glVertex3f(0.0,ymax,0.0);
+        glEnd();
+        for (double x=1.0; x<=xmax; x++) {       // Top columns
+            glBegin(GL_LINES);
+                glVertex3f(x,ymin,0.0);
+                glVertex3f(x,ymax,0.0);
+            glEnd();
+        }        
+        
+    // Let's finish drawing the world coordinate vectors...
+    glLineWidth(2.0);
     glColor3f(0.0,0.0,1.0);             // Z VECTOR
     glBegin(GL_LINES);
         glVertex3f(0.0,0.0,0.0);
         glVertex3f(0.0,0.0,1.0);
     glEnd();
-    
-    glColor3f(0.5,0.5,0.5);     // Line color
-    
-    
-    double xmin = -5; 
-    double xmax =  5;
-    double ymin = -5; 
-    double ymax =  5;
-    
-    for (double r=-5; r<=5; r++) {
-        // Draw a line from 
-    }
+    glLineWidth(1.0);
     
     glDisable(GL_COLOR_MATERIAL); 
     glEnable(GL_LIGHTING);
@@ -214,7 +266,7 @@ void worldLighting() {
     float lightAmb0[] =         { 0.5, 0.5, 0.5, 1.0 };
     float lightDifAndSpec0[] =  { 0.5, 0.5, 0.5, 1.0 };
     float globAmb0[] =          { 0.2, 0.2, 0.2, 1.0 };
-    float lightPos0[] =    { 0.0, 0.0, -30.0, 1.0 };
+    float lightPos0[] =         { 0.0, 0.0, 30.0, 1.0 };
 
     // Light0 properties.
     glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb0);
@@ -258,8 +310,7 @@ void drawScene(void)
     glLoadIdentity();
     gluLookAt(Camera[0],Camera[1],Camera[2],  // Camera position
               0,0,0,   // Look at center 
-              0,0,1);  // Y-direction is up
-        
+              0,0,1);  // Z-direction is up
     worldLighting();            // Lighting
     drawGrid();                 // Grid
     SIM.draw(wireframe);        // Simulation objects
@@ -330,7 +381,7 @@ void keyInput(unsigned char key, int x, int y)
 //                   cout << "Error:unable to create thread," << rc << endl;
 //                   exit(-1);
 //                }
-               for (int i=0; i<10; i++) {   // Runs a certain number of times
+               for (int i=0; i<1; i++) {   // Runs a certain number of times
                    SIM.step();
                    drawScene();
                }
@@ -363,26 +414,26 @@ void keyInput(unsigned char key, int x, int y)
 void mousePressEvent(int button, int state, int x, int y)
 {
   //process mouse events for rotate/move inside 3D scene
-    cout << "Mouse Press" << endl;
-    cout << "Button: " << button << endl; 
-    cout << "State: " << state << endl; 
+//    cout << "Mouse Press" << endl;
+//    cout << "Button: " << button << endl; 
+//    cout << "State: " << state << endl; 
     
     if (button == 0) {
         camRXp = CamXrot;
         camRYp = CamZrot;
         camXi = x;
         camYi = y;
-        cout << "Starting rotation with (" << camRXp << ", " << camRYp << ")" << endl;
+        //cout << "Starting rotation with (" << camRXp << ", " << camRYp << ")" << endl;
     }
     else if (button == 3) {
-        cout << "Zoom in " << endl;
+        //cout << "Zoom in " << endl;
         // Update camera position
         camZoomFactor *= 0.9;   // Zoom
         updateCameraPosition(); // Update camera position 
         drawScene();            // Redraw from new camera position 
     }
     else if (button == 4) {
-        cout << "Zoom out " << endl; 
+        //cout << "Zoom out " << endl; 
         // Update camera position
         camZoomFactor *= 1.1;   // Zoom
         updateCameraPosition(); // Update camera position 
@@ -393,8 +444,8 @@ void mousePressEvent(int button, int state, int x, int y)
 void mouseMoveEvent(int x, int z)
 {
  //process keyboard events
-    cout << "Mouse Event" << endl; 
-    cout << "   dX = " << x-camXi << ",   dZ = " << camYi-z << endl;  
+    //cout << "Mouse Event" << endl; 
+    //cout << "   dX = " << x-camXi << ",   dZ = " << camYi-z << endl;  
      
     double rotScale = 0.01;
     CamXrot = camRXp + (camYi-z)*rotScale; 
@@ -404,7 +455,7 @@ void mouseMoveEvent(int x, int z)
 }
 
 void updateCameraPosition() {
-    cout << "Updating rotation (" << CamXrot << ", " << CamZrot << ")" << endl;
+    //cout << "Updating rotation (" << CamXrot << ", " << CamZrot << ")" << endl;
     
     mat Rx = zeros(3,3);  // Init rotation matrices
     mat Rz = zeros(3,3);
@@ -414,7 +465,7 @@ void updateCameraPosition() {
     Rx(2,2) = cos(CamXrot);
     Rx(1,2) = -sin(CamXrot);
     Rx(2,1) = sin(CamXrot);
-    Rx.print();
+    //Rx.print();
     
     Rz(2,2) = 1;
     Rz(0,0) = cos(CamZrot);

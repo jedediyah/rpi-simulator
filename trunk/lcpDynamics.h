@@ -25,7 +25,7 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
                  Body_trimesh *trimeshes, int &num_trimeshes, 
                  int &nb, int &nc, double &h) {
     
-    int nd = 3;  // Number of friction directions in discretized friction cone
+    int nd = 0;  // Number of friction directions in discretized friction cone
     
     /////////////////////////////////////
     // Initialize submatrices 
@@ -184,7 +184,6 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
 //    cout << "MinvGf" << endl; MinvGf.print(); 
 //    cout << "MinvPext" << endl; MinvPext.print(); 
     
-    
     // Prepare data for LCP call
     int nn = A.n_rows; 
     double AA[A.n_elem]; 
@@ -235,8 +234,8 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     
     vec RESULT =  NU + MinvGn*Pn + MinvGf*Pf + MinvPext;  // RESULT
     
-    Gf.print();
-    RESULT.print();
+    cout << "FX:" << endl; FX.print();
+    cout << "Resutl:"  << endl; RESULT.print();
 
     return RESULT; 
     
