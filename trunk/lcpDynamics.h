@@ -235,6 +235,8 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     vec RESULT =  NU + MinvGn*Pn + MinvGf*Pf + MinvPext;  // RESULT
     
     cout << "FX:" << endl; FX.print();
+    cout << "b: " << endl; b.print(); 
+    
     cout << "Resutl:"  << endl; RESULT.print();
 
     return RESULT; 

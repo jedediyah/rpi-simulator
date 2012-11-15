@@ -84,6 +84,10 @@ void Body_sphere::draw(bool wireframe) {
 
     glPushMatrix();
     
+        glTranslatef(Body_object::u().at(0), // Translation
+            Body_object::u().at(1),
+            Body_object::u().at(2));
+    
         // Convert quaternion to axis-angle for glRotatef() 
         double a = 2 * acos(Body_object::quat().at(0));
         double s = sqrt(1 - Body_object::quat().at(0) * Body_object::quat().at(0));
@@ -103,16 +107,11 @@ void Body_sphere::draw(bool wireframe) {
 
         glRotatef(a * 57.2958, x, y, z); // Rotation     
 
-        glTranslatef(Body_object::u().at(0), // Translation
-                Body_object::u().at(1),
-                Body_object::u().at(2));
-        
         if (wireframe)
             glutWireSphere(Radius, 10, 10);
         else
             glutSolidSphere(Radius, 15, 15);
 
-    
     glPopMatrix();
         
 //            double zMove = 0.0; 
