@@ -131,8 +131,9 @@ void Simulation::addSphere() {
     Body_sphere sphere = Body_sphere();
     
     if ( Num_Spheres == 1 ) {
-        sphere.setPosition(-13., 3., 1.2);
+        sphere.setPosition(0, 0, 4);
         sphere.setName("s2"); 
+        sphere.setFext(0,0,-9.8,0,0,0);
         sphere.setQuaternion(.0707, .2666, .5332, .7998);
     }
     else if (Num_Spheres == 2 ) {
@@ -145,7 +146,9 @@ void Simulation::addSphere() {
     else {
 //        sphere.setPosition(-14,-5,4.0);
 //        sphere.setRadius(3.0);
-        sphere.setVelocity(1,0,0,0,0,0);
+        sphere.setVelocity(.1,0,0,0,0,0);
+        sphere.setPosition(0,0,2);
+        sphere.setFext(0,0,-9.8,0,0,0);
         sphere.setName("s1"); 
     }
     
