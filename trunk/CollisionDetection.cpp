@@ -51,28 +51,28 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
     }
     
     
-     ////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
     // SPHERE-GROUND collision detection
-    for (int s = 0; s < num_spheres; s++) {
-        if (!spheres[s].isStaticBody()) {
-            mat psi = zeros(1);
-            psi.at(0) = spheres[s].u().at(2) - spheres[s].radius(); // psi=height-radius
-            mat n = zeros(3, 1);
-            n.at(2) = 1.0; // Normal to sphere is always up (+z direction)
-            
-            mat t = arbitraryTangent(n);
-            vec r1 = n;    // Won't be used... since ground is static.
-            mat r2 = -n * spheres[s].radius(); 
-            Contact c = Contact(cID++, -3, s, n, t, r1, r2, psi);   // -3 is our special int for GROUND
-            Contacts[num_contacts++] = c;
-
-            spheres[s].ContactCount++; // Already made sure not static 
-            if (spheres[s].BodyIndex < 0) {
-                spheres[s].BodyIndex = bID++;
-                num_bodies++;
-            }
-        }
-    }
+//    for (int s = 0; s < num_spheres; s++) {
+//        if (!spheres[s].isStaticBody()) {
+//            mat psi = zeros(1);
+//            psi.at(0) = spheres[s].u().at(2) - spheres[s].radius(); // psi=height-radius
+//            mat n = zeros(3, 1);
+//            n.at(2) = 1.0; // Normal to sphere is always up (+z direction)
+//            
+//            mat t = arbitraryTangent(n);
+//            vec r1 = n;    // Won't be used... since ground is static.
+//            mat r2 = -n * spheres[s].radius(); 
+//            Contact c = Contact(cID++, -3, s, n, t, r1, r2, psi);   // -3 is our special int for GROUND
+//            Contacts[num_contacts++] = c;
+//
+//            spheres[s].ContactCount++; // Already made sure not static 
+//            if (spheres[s].BodyIndex < 0) {
+//                spheres[s].BodyIndex = bID++;
+//                num_bodies++;
+//            }
+//        }
+//    }
     
     
     ////////////////////////////////////////////////////////////////
