@@ -132,14 +132,14 @@ void Simulation::addSphere() {
     
     if ( Num_Spheres == 1 ) {
         sphere.setRadius(1.0);
-        sphere.setPosition(0, 0, 3);
+        sphere.setPosition(0, 0, 7);
         sphere.setName("s2"); 
         sphere.setFext(0,0,-9.8,0,0,0);
         //sphere.setQuaternion(.0707, .2666, .5332, .7998);
     }
     else if (Num_Spheres == 2 ) {
         sphere.setRadius(1.0);
-        sphere.setPosition(-.3,0,5.1);
+        sphere.setPosition(-.3,0,10.3);
         sphere.setName("s3"); 
         sphere.setFext(0,0,-9.8,0,0,0);
         //sphere.setVelocity(0,2,0,0,0,0);
@@ -149,9 +149,9 @@ void Simulation::addSphere() {
 //        sphere.setPosition(-14,-5,4.0);
 //        sphere.setRadius(3.0);
         sphere.setVelocity(0,0,0,0,0,0);
-        sphere.setPosition(.2,0,0);
+        sphere.setPosition(.2,0,3.5);
         //sphere.setFext(0,0,-9.8,0,0,0);
-        sphere.setRadius(2.0);
+        sphere.setRadius(1.5);
         sphere.setStatic(true); 
         sphere.setName("s1"); 
     }

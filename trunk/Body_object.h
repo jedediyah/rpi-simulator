@@ -70,16 +70,16 @@ protected:
     string Name; // Name of object
     string Body_Type; 
     double Mass;
-    mat Mass_Matrix;          // 3x3 mass matrix = mass * eye(3)
-    mat Mass_Inverse_Matrix;  // 3x3 inverse of mass matrix used for LCP formulation
-    mat Inertia_Matrix;       // 3x3 inertia tensor 
-    mat Mass_Inertia_Matrix;  // 6x6
-    vec U;      // Position [x y z]
-    vec Quat;   // Quaternion [a i j k]
-    mat R;      // Rotation matrix
-    vec Nu;     // Velocity as [Vx Vy Vz Wx Wy Wz]
-    vec Fext;   // External force, including torques [Fx Fy Fz Tx Ty Tz]
-    vec Aext;   // External acceleration [Ax Ay Az ax ay az]  
+    mat::fixed<3,3> Mass_Matrix;          // 3x3 mass matrix = mass * eye(3)
+    mat::fixed<3,3> Mass_Inverse_Matrix;  // 3x3 inverse of mass matrix used for LCP formulation
+    mat::fixed<3,3> Inertia_Matrix;       // 3x3 inertia tensor 
+    mat::fixed<6,6> Mass_Inertia_Matrix;  // 6x6 mass-inertia matrix
+    vec::fixed<3>   U;      // Position [x y z]
+    vec::fixed<4>   Quat;   // Quaternion [a i j k]
+    mat::fixed<3,3> R;      // Rotation matrix
+    vec::fixed<6>   Nu;     // Velocity as [Vx Vy Vz Wx Wy Wz]
+    vec::fixed<6>   Fext;   // External force, including torques [Fx Fy Fz Tx Ty Tz]
+    vec::fixed<6>   Aext;   // External acceleration [Ax Ay Az ax ay az]  
     double Mu;  // Friction "factor"
     bool IsStaticBody; // Dynamic or static body
     double Bounding_Radius; 
