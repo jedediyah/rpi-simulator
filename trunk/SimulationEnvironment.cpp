@@ -36,12 +36,14 @@ static bool wireframe = false;
 double gridColor[] = {0.5, 0.5, 0.5};
 int addState = 0;               // State machine for adding objects
 
-double CamLookAt[3] = {0.0, 0.0, 0.0}; 
+vec::fixed<3> Camera;
+vec::fixed<3> CameraPrev; 
+vec::fixed<3> CamLookAt = zeros(3); 
+vec::fixed<3> CamLookAtPrev = zeros(3); 
 // Mouse rotation and zoom 
 bool   enableMouseRotation = false; 
 bool   enableMouseTranslation = false; 
 double rotScale = 0.01;         // How quickly mouse rotates view
-double Camera[3]; 
 double CamInit[3];
 double CamXrot;
 double CamZrot; 
@@ -331,7 +333,7 @@ void drawScene(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(Camera[0], Camera[1], Camera[2],  // Camera position
-              CamLookAt[0],CamLookAt[1],CamLookAt[2],   // Look at center 
+              CamLookAt.at(0),CamLookAt.at(1),CamLookAt.at(2),   // Look at center 
               0,0,1);  // Z-direction is up
     worldLighting();            // Lighting
     drawGrid();                 // Grid
@@ -456,13 +458,23 @@ void mousePressEvent(int button, int state, int x, int y)
     }
     // Begin translation 
     else if (button == MiddleClick && state == 0 && modifier == Shift) { 
+        cout << "STARTING translation..." << endl; 
         camXi = x;
         camYi = y; 
-        double a,b,c; 
-        a = CamLookAt[0] - Camera[0]; 
-        b = CamLookAt[1] - Camera[1];
-        c = CamLookAt[2] - Camera[2]; 
-        cout << a << endl << b << endl << c << endl; 
+        CamLookAtPrev = CamLookAt; 
+        CameraPrev = Camera; 
+        
+        vec Z = zeros(3);
+        Z.at(2) = 1.0; 
+        CamLook = CamLookAt - Camera;  
+        CamRight = cross(CamLook,Z); 
+        CamUp = cross(CamRight,CamLook);
+        
+        CamLook = CamLook / norm(CamLook,2);        // Normalize vectors
+        CamRight = CamRight / norm(CamRight,2); 
+        CamUp = CamUp / norm(CamUp,2); 
+        
+        enableMouseTranslation = true; 
     }
     // Disable mouse rotation and translation 
     else if (button == MiddleClick && state == 1 ) {
@@ -497,6 +509,16 @@ void mouseMoveEvent(int x, int z)
         CamXrot = camRXp + (camYi-z)*rotScale; 
         CamZrot = camRYp + (camXi-x)*rotScale; 
         updateCameraPosition();  
+    }
+    else if (enableMouseTranslation) {
+        double dz = camYi-z;
+        double dx = x-camXi; 
+        
+        cout << "dx: " << dx << endl;
+        cout << "dz: " << dz << endl; 
+        Camera = CameraPrev - CamRight*(dx/10) - CamUp*(dz/10.0);
+        CamLookAt = CamLookAtPrev - CamRight*(dx/10) - CamUp*(dz/10.0);
+        drawScene(); 
     }
 }
 
