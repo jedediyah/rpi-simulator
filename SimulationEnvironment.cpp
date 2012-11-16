@@ -17,6 +17,15 @@
 #  include <GL/glut.h>
 #endif
 
+#define LeftClick 0     // Mouse integers 
+#define MiddleClick 1
+#define RightClick 2
+#define ScrollUp 3
+#define ScrollDown 4
+
+#define Shift 1         // Keyboard modifiers 
+#define Ctrl 2
+#define ShiftCtrl 3
 
 // Global variables
 static GLsizei width, height;   // OpenGL window size.
@@ -24,15 +33,26 @@ static Simulation SIM;          // Instance of simulator
 static pthread_t simThread; 
 static int rc; 
 static bool wireframe = false; 
+double gridColor[] = {0.5, 0.5, 0.5};
+int addState = 0;               // State machine for adding objects
 
+double CamLookAt[3] = {0.0, 0.0, 0.0}; 
+// Mouse rotation and zoom 
+bool   enableMouseRotation = false; 
+bool   enableMouseTranslation = false; 
+double rotScale = 0.01;         // How quickly mouse rotates view
 double Camera[3]; 
 double CamInit[3];
 double CamXrot;
 double CamZrot; 
 double camRXp, camRYp; 
 double camXi, camYi;
-double camZoomFactor = 1.0;  // Change of 10% every zoom
-double gridColor[] = {0.5, 0.5, 0.5};
+double camZoomFactor = 1.0;     // Change of 10% every zoom
+
+// Mouse translation 
+vec CamLook;
+vec CamRight;
+vec CamUp;
 
 // STATIC methods
 void makeMenu(void);
@@ -71,6 +91,7 @@ void menuAddObject(int objID) {
     switch(objID) {
         case 1:
             cout << "Adding sphere" << endl;
+            SIM.addSphere(); 
             break;
         case 2: 
             cout << "Adding tetrahedron" << endl;
@@ -89,6 +110,7 @@ void menuAddObject(int objID) {
             break;
             
     }
+    addState = 1;
     
 }
 
@@ -135,7 +157,7 @@ void initializeGL(int argc, char **argv)
     
     // GLUT
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB); 
+    glutInitDisplayMode(GLUT_DOUBLE);  // Double buffer (gets rid of flickering)
     glutInitWindowSize(900, 900);
     glutInitWindowPosition(300, 100); 
     glutCreateWindow("RPI - Simulator");
@@ -159,9 +181,9 @@ void initializeGL(int argc, char **argv)
     
 //    SIM.addCube();      // TODO
 //    SIM.addCube();
-    SIM.addSphere();
-    SIM.addSphere();
-    SIM.addSphere();
+//    SIM.addSphere();
+//    SIM.addSphere();
+//    SIM.addSphere();
     
 }
 
@@ -308,14 +330,14 @@ void drawScene(void)
     // Rotate camera
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(Camera[0],Camera[1],Camera[2],  // Camera position
-              0,0,0,   // Look at center 
+    gluLookAt(Camera[0], Camera[1], Camera[2],  // Camera position
+              CamLookAt[0],CamLookAt[1],CamLookAt[2],   // Look at center 
               0,0,1);  // Z-direction is up
     worldLighting();            // Lighting
     drawGrid();                 // Grid
     SIM.draw(wireframe);        // Simulation objects
     
-    glFlush(); 
+    glutSwapBuffers();
 }
 
 
@@ -324,7 +346,7 @@ void resize(int width, int height)
 {
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    int side = min(width, height);
+    //int side = min(width, height);
     //glViewport((width - side) / 2, (height - side) / 2, side, side);
     
    // glViewport(0, 0, width, height);
@@ -366,7 +388,7 @@ void *runSim(void *threadid)
 // Keyboard input processing routine.
 void keyInput(unsigned char key, int x, int y)
 {
-   // cout << "K:" << (int)key << endl;
+    cout << "K:" << (int)key << endl;
    switch (key) 
    {
        case 32: // Space bar
@@ -414,17 +436,40 @@ void keyInput(unsigned char key, int x, int y)
 void mousePressEvent(int button, int state, int x, int y)
 {
   //process mouse events for rotate/move inside 3D scene
-//    cout << "Mouse Press" << endl;
-//    cout << "Button: " << button << endl; 
-//    cout << "State: " << state << endl; 
+    cout << "Mouse Press" << endl;
+    cout << "Button: " << button << endl; 
+    cout << "State: " << state << endl; 
+    cout << "Shift: " << glutGetModifiers() << endl ;
     
-    if (button == 0) {
+    int modifier = glutGetModifiers();  // No shift nor control -> 0
+                                        // Shift -> 1
+                                        // Ctrl -> 2
+                                        // Shift && Ctrl -> 3
+    // Begin rotation 
+    if (button == MiddleClick && state == 0 && modifier == 0) { 
+        enableMouseRotation = true;
         camRXp = CamXrot;
         camRYp = CamZrot;
         camXi = x;
         camYi = y;
         //cout << "Starting rotation with (" << camRXp << ", " << camRYp << ")" << endl;
     }
+    // Begin translation 
+    else if (button == MiddleClick && state == 0 && modifier == Shift) { 
+        camXi = x;
+        camYi = y; 
+        double a,b,c; 
+        a = CamLookAt[0] - Camera[0]; 
+        b = CamLookAt[1] - Camera[1];
+        c = CamLookAt[2] - Camera[2]; 
+        cout << a << endl << b << endl << c << endl; 
+    }
+    // Disable mouse rotation and translation 
+    else if (button == MiddleClick && state == 1 ) {
+        enableMouseRotation = false; 
+        enableMouseTranslation = false; 
+    }
+    // Zoom in
     else if (button == 3) {
         //cout << "Zoom in " << endl;
         // Update camera position
@@ -432,6 +477,7 @@ void mousePressEvent(int button, int state, int x, int y)
         updateCameraPosition(); // Update camera position 
         drawScene();            // Redraw from new camera position 
     }
+    // Zoom out
     else if (button == 4) {
         //cout << "Zoom out " << endl; 
         // Update camera position
@@ -447,11 +493,11 @@ void mouseMoveEvent(int x, int z)
     //cout << "Mouse Event" << endl; 
     //cout << "   dX = " << x-camXi << ",   dZ = " << camYi-z << endl;  
      
-    double rotScale = 0.01;
-    CamXrot = camRXp + (camYi-z)*rotScale; 
-    CamZrot = camRYp + (camXi-x)*rotScale; 
-    
-    updateCameraPosition();  
+    if (enableMouseRotation) {
+        CamXrot = camRXp + (camYi-z)*rotScale; 
+        CamZrot = camRYp + (camXi-x)*rotScale; 
+        updateCameraPosition();  
+    }
 }
 
 void updateCameraPosition() {

@@ -81,20 +81,11 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
             if (nd > 0) {
                 Gf_i2 = zeros(6,nd); 
                 for (double j=0; j < nd; j++) {    // For each friction direction
-                    
-//                    mat R = rot(Contacts[i].normal, ((j)/(double)nd)*(2.*M_PI));
-//                    cout << "R:" << endl; R.print(); 
-//                    cout << "a:" << ((j)/(double)nd)*(2.*M_PI) << endl; 
                     d = rot(Contacts[i].normal, ((j)/(double)nd)*(2.*M_PI)) * Contacts[i].tangent; 
-//                    
-//                    cout << "t:" << endl; Contacts[i].tangent.print(); 
-//                    cout << "d:" << endl; d.print();
                     Gf_i2.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r2,d));
                 }
-//                Gf_i2.print();
                 if ( !spheres[Contacts[i].body2].isStaticBody() )
                     Gf.submat( span(6*body2id-6,6*body2id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i2; 
-//                Gf.print();
             }
 
             // With the MCP, this is where we would fill in a portion of b.  
@@ -135,13 +126,10 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
                     Gf_i1.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r1,d));
                     Gf_i2.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r2,d));
                 }
-//                Gf_i1.print();
-//                Gf_i2.print();
                 if ( !spheres[Contacts[i].body1].isStaticBody() )
                     Gf.submat( span(6*body1id-6,6*body1id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i1;  // Need to double check these indices 
                 if ( !spheres[Contacts[i].body2].isStaticBody() )
                     Gf.submat( span(6*body2id-6,6*body2id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i2; 
-//                Gf.print();
             }
 
             // With the MCP, this is where we would fill in a portion of b.  
@@ -180,9 +168,6 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     vec b = join_cols( join_cols(Gn.t()*(NU+MinvPext)+PSI/h, 
                        Gf.t()*(NU + MinvPext) ), 
                        zeros(nc,1) );    
-//    cout << "MinvGn" << endl; MinvGn.print();
-//    cout << "MinvGf" << endl; MinvGf.print(); 
-//    cout << "MinvPext" << endl; MinvPext.print(); 
     
     // Prepare data for LCP call
     int nn = A.n_rows; 
@@ -203,7 +188,7 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     lcp_nsqp(&nn,AA,bb,z0,w,&info,&iparamLCP,dparamLCP);        // Solve LCP 
     switch(info) {
         case 0:
-            cout << "LCP: Converged" << endl; 
+            //cout << "LCP: Converged" << endl; 
             break;
         case 1: 
             cout << "LCP: Too many iterations" << endl;
@@ -231,16 +216,8 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
         Pn.at(i) = z0[i]; 
     for (int i=nc; i<nc+nd*nc; i++)
         Pf.at(i-nc) = z0[i]; 
-    
-    vec RESULT =  NU + MinvGn*Pn + MinvGf*Pf + MinvPext;  // RESULT
-    
-    //cout << "z0:" << endl; for (int i=0; i<nc+nd*nc; i++) cout << z0[i]; 
-    cout << "Pn: " << endl; Pn.print();
-    cout << "Pf: " << endl; Pf.print();
-    cout << "NUnu: " << endl; RESULT.print(); 
-    
 
-    return RESULT; 
+    return NU + MinvGn*Pn + MinvGf*Pf + MinvPext; 
     
 }
 
