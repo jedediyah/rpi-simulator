@@ -8,8 +8,10 @@
 #include "SimulationEnvironment.h"
 
 #include <cmath>
+//#define ARMA_NO_DEBUG    // TODO: add for optimization
+#include <armadillo>
 //#include <boost/thread.hpp>
-#include <pthread.h>
+//#include <pthread.h>
 
 #ifdef __APPLE__
 #  include <GLUT/glut.h>
@@ -27,6 +29,14 @@
 #define Ctrl 2
 #define ShiftCtrl 3
 
+#define TRIMESH 0       // For marking active object type
+#define SPHERE 1
+
+#define objMOVE 1       // Classifies how to move active object
+#define objMOVE_X 2
+#define objMOVE_Y 3
+#define objMOVE_Z 4
+
 // Global variables
 static GLsizei width, height;   // OpenGL window size.
 static Simulation SIM;          // Instance of simulator
@@ -35,6 +45,8 @@ static int rc;
 static bool wireframe = false; 
 double gridColor[] = {0.5, 0.5, 0.5};
 int addState = 0;               // State machine for adding objects
+int activeBody_type;
+int activeBody_index; 
 
 vec::fixed<3> Camera;
 vec::fixed<3> CameraPrev; 
@@ -43,6 +55,7 @@ vec::fixed<3> CamLookAtPrev = zeros(3);
 // Mouse rotation and zoom 
 bool   enableMouseRotation = false; 
 bool   enableMouseTranslation = false; 
+bool   enableObjectMove = false; 
 double rotScale = 0.01;         // How quickly mouse rotates view
 double CamInit[3];
 double CamXrot;
@@ -55,6 +68,9 @@ double camZoomFactor = 1.0;     // Change of 10% every zoom
 vec CamLook;
 vec CamRight;
 vec CamUp;
+
+// Mouse move object
+vec obj_Ui;  // Initial position 
 
 // STATIC methods
 void makeMenu(void);
@@ -70,6 +86,7 @@ void updateCameraPosition();
 void mousePassiveMoveEvent(int x, int y);
 
 using namespace std;
+using namespace arma; 
 //using namespace boost; 
 
 // Constructors 
@@ -92,8 +109,11 @@ void menuAddObject(int objID) {
     cout << "Add Object... [" << objID << "]" << endl; 
     switch(objID) {
         case 1:
-            cout << "Adding sphere" << endl;
+            //cout << "Adding sphere" << endl;
+            activeBody_index = SIM.num_spheres();
             SIM.addSphere(); 
+            activeBody_type = SPHERE; 
+            cout << activeBody_index << endl; 
             break;
         case 2: 
             cout << "Adding tetrahedron" << endl;
@@ -174,7 +194,6 @@ void initializeGL(int argc, char **argv)
     
     makeMenu(); 
     
-    //CamInit[0]=-20;           CamInit[1]=-34.641;           CamInit[2]=30;
     CamInit[0]=-10.0;           CamInit[1]=-14.3205;           CamInit[2]=12.0;
     Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2]; 
     
@@ -333,8 +352,15 @@ void drawScene(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(Camera[0], Camera[1], Camera[2],  // Camera position
-              CamLookAt.at(0),CamLookAt.at(1),CamLookAt.at(2),   // Look at center 
+              CamLookAt.at(0),CamLookAt.at(1),CamLookAt.at(2), 
               0,0,1);  // Z-direction is up
+    
+        // Draw sphere at CamLookAt
+        glPushMatrix();
+        glTranslatef(CamLookAt.at(0),CamLookAt.at(1),CamLookAt.at(2));
+        glutWireSphere(.1,5,5);
+        glPopMatrix();
+    
     worldLighting();            // Lighting
     drawGrid();                 // Grid
     SIM.draw(wireframe);        // Simulation objects
@@ -390,7 +416,7 @@ void *runSim(void *threadid)
 // Keyboard input processing routine.
 void keyInput(unsigned char key, int x, int y)
 {
-    cout << "K:" << (int)key << endl;
+   // cout << "K:" << (int)key << endl;
    switch (key) 
    {
        case 32: // Space bar
@@ -411,16 +437,20 @@ void keyInput(unsigned char key, int x, int y)
                }
            }
            break;
-       case 115: // s
-           cout << "Adding sphere..." << endl;
-           SIM.addSphere();
-           break;
+       case 115: // s           // TODO: get rid of this
+//           cout << "Adding sphere..." << endl;
+//           SIM.addSphere();
+//           break;
        case 112: // p
            SIM.printBodies(); 
            break;
        case 9: // [tab]
            wireframe = !wireframe; 
            drawScene();
+           break;
+           
+       case 103: // g
+           
            break;
            
        case 113: // q
@@ -438,10 +468,10 @@ void keyInput(unsigned char key, int x, int y)
 void mousePressEvent(int button, int state, int x, int y)
 {
   //process mouse events for rotate/move inside 3D scene
-    cout << "Mouse Press" << endl;
-    cout << "Button: " << button << endl; 
-    cout << "State: " << state << endl; 
-    cout << "Shift: " << glutGetModifiers() << endl ;
+//    cout << "Mouse Press" << endl;
+//    cout << "Button: " << button << endl; 
+//    cout << "State: " << state << endl; 
+//    cout << "Shift: " << glutGetModifiers() << endl ;
     
     int modifier = glutGetModifiers();  // No shift nor control -> 0
                                         // Shift -> 1
@@ -458,7 +488,7 @@ void mousePressEvent(int button, int state, int x, int y)
     }
     // Begin translation 
     else if (button == MiddleClick && state == 0 && modifier == Shift) { 
-        cout << "STARTING translation..." << endl; 
+        //cout << "STARTING translation..." << endl; 
         camXi = x;
         camYi = y; 
         CamLookAtPrev = CamLookAt; 
@@ -477,7 +507,7 @@ void mousePressEvent(int button, int state, int x, int y)
         enableMouseTranslation = true; 
     }
     // Disable mouse rotation and translation 
-    else if (button == MiddleClick && state == 1 ) {
+    else if ((button == LeftClick || button == MiddleClick) && state == 1 ) {
         enableMouseRotation = false; 
         enableMouseTranslation = false; 
     }
@@ -501,12 +531,8 @@ void mousePressEvent(int button, int state, int x, int y)
 
 void mouseMoveEvent(int x, int z)
 {
- //process keyboard events
-    //cout << "Mouse Event" << endl; 
-    //cout << "   dX = " << x-camXi << ",   dZ = " << camYi-z << endl;  
-     
     if (enableMouseRotation) {
-        CamXrot = camRXp + (camYi-z)*rotScale; 
+        CamXrot = camRXp + (camYi-z)*rotScale;  // TODO limit within range 
         CamZrot = camRYp + (camXi-x)*rotScale; 
         updateCameraPosition();  
     }
@@ -516,9 +542,13 @@ void mouseMoveEvent(int x, int z)
         
         cout << "dx: " << dx << endl;
         cout << "dz: " << dz << endl; 
-        Camera = CameraPrev - CamRight*(dx/10) - CamUp*(dz/10.0);
-        CamLookAt = CamLookAtPrev - CamRight*(dx/10) - CamUp*(dz/10.0);
+        double tfact = 100.0;  // Translation factor.  
+        Camera = CameraPrev - CamRight*(dx/tfact) - CamUp*(dz/tfact);
+        CamLookAt = CamLookAtPrev - CamRight*(dx/tfact) - CamUp*(dz/tfact);
         drawScene(); 
+    }
+    else if (enableObjectMove) {
+        
     }
 }
 
@@ -547,9 +577,9 @@ void updateCameraPosition() {
     zi(2,0) = CamInit[2] * camZoomFactor; 
     
     mat r = Rz*Rx*zi;   
-    Camera[0] = r(0);
-    Camera[1] = r(1);
-    Camera[2] = r(2); 
+    Camera.at(0) = r(0) + CamLookAt.at(0);
+    Camera.at(1) = r(1) + CamLookAt.at(1);
+    Camera.at(2) = r(2) + CamLookAt.at(2); 
     
     drawScene();
 }

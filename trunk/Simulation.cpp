@@ -36,6 +36,10 @@ Simulation::~Simulation() {
 //void Simulation::setParent(SimulationEnvironment parent) { PARENT = parent; }
 //SimulationEnvironment Simulation::parent() { return PARENT; }
 
+int Simulation::num_bodies() { return Num_Bodies; }
+int Simulation::num_spheres() { return Num_Spheres; }
+int Simulation::num_trimeshes() { return Num_Trimeshes; }
+
 void Simulation::printBodies() {
     
     glShadeModel(GL_FLAT);   // ?
@@ -169,12 +173,12 @@ bool Simulation::isRunning() { return running; }
 void Simulation::step() {  // dt is now step_size...
     
     // Collision detection 
-    CD.findCollisions(Contacts, num_bodies, num_contacts, num_subcontacts, Sphere_Bodies, Num_Spheres); 
+    CD.findCollisions(Contacts, Num_Bodies, num_contacts, num_subcontacts, Sphere_Bodies, Num_Spheres); 
     
     vec z;  // Will hold the result of the dynamics 
-    //cdaDynamics(Contacts, Sphere_Bodies, Trimesh_Bodies, num_bodies, num_contacts, num_subcontacts );
+    //cdaDynamics(Contacts, Sphere_Bodies, Trimesh_Bodies, Num_Bodies, num_contacts, num_subcontacts );
     z = lcpDynamics(Contacts, Sphere_Bodies, Num_Spheres, Trimesh_Bodies, Num_Trimeshes,
-                num_bodies, num_contacts, step_size );
+                Num_Bodies, num_contacts, step_size );
     
     // Kinematic update: update each object's NU, then step. 
     for (int i=0; i<Num_Trimeshes; i++) { 

@@ -24,6 +24,10 @@ public:
     //void setParent(SimulationEnvironment parent); 
     //SimulationEnvironment parent(); 
     
+    int num_bodies();
+    int num_spheres(); 
+    int num_trimeshes();
+    
     void draw(bool wireframe); 
     
     bool addBody(Body_object &body); 
@@ -62,7 +66,6 @@ private:
     Contact Contacts[1000];  // Since not dynamic, be careful to not overfill...
     int num_contacts;
     int num_subcontacts;
-    int num_bodies;
     
 
 };
