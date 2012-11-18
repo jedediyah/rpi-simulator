@@ -51,11 +51,11 @@ void Simulation::setActiveBodyPosition(vec u) {
     }
     else if (ActiveBody_Type == TRIMESH) {
         Trimesh_Bodies[ActiveBody_Index].setPosition(u[0],u[1],u[2]); 
+        Trimesh_Bodies[ActiveBody_Index].updateWorld_Verts(); 
     }
 }
 vec Simulation::activeBodyPosition()    { 
     if (ActiveBody_Type == SPHERE) {
-                //cout<<"U: "<<endl; Sphere_Bodies[ActiveBody_Index].u().print(); 
         return Sphere_Bodies[ActiveBody_Index].u();
     }
     else if (ActiveBody_Type == TRIMESH) {
@@ -67,12 +67,10 @@ int Simulation::activeBody_index()      { return ActiveBody_Index; }
 
 void Simulation::printBodies() {
     
-    glShadeModel(GL_FLAT);   // ?
     for (int i=0; i<Num_Trimeshes; i++) { // Draw all Trimeshes
-        Trimesh_Bodies[i].print(); 
+        Trimesh_Bodies[i].printAllData(); 
     }
     
-    glShadeModel(GL_SMOOTH);
     for (int i=0; i<Num_Spheres; i++) {   // Draw all Spheres
         Sphere_Bodies[i].print();
     }
@@ -80,18 +78,28 @@ void Simulation::printBodies() {
 
 void Simulation::draw(bool wireframe) { 
     
-    // Material property vectors.
-    float matAmb[] = {0.0, 0.0, 1.0, 1.0};
-    float matDif[] = {0.0, 0.0, 1.0, 1.0};
-    float matSpec[] = { 1.0, 1.0, 1.0, 1.0 };
-    float matShine[] = { 50.0 };
-    float matEmission[] = {0.0, 0.0, 0.0, 1.0};
-       // Material properties.
-    glMaterialfv(GL_FRONT, GL_AMBIENT, matAmb);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, matDif);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
-    glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
-    glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
+//    // Material property vectors.
+//    float matAmb[] = {0.0, 0.0, 1.0, 1.0};
+//    float matDif[] = {0.0, 0.0, 1.0, 1.0};
+//    float matSpec[] = { 1.0, 1.0, 1.0, 1.0 };
+//    float matShine[] = { 50.0 };
+//    float matEmission[] = {0.0, 0.0, 0.0, 1.0};
+//       // Material properties.
+//    glMaterialfv(GL_FRONT, GL_AMBIENT, matAmb);
+//    glMaterialfv(GL_FRONT, GL_DIFFUSE, matDif);
+//    glMaterialfv(GL_FRONT, GL_SPECULAR, matSpec);
+//    glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
+//    glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
+    
+       // Material property vectors.
+   float matAmbAndDif1[] = {0.9, 0.0, 0.0, 1.0};
+   float matAmbAndDif2[] = {0.0, 0.9, 0.0, 1.0};
+   float matSpec[] = {1.0, 1.0, 1.0, 1.0};
+   float matShine[] = {50.0};
+      // Material properties 
+   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
+   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpec);
+   glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShine);
     
     for (int i=0; i<Num_Trimeshes; i++) { // Draw all Trimeshes
         Trimesh_Bodies[i].draw();
@@ -133,33 +141,6 @@ bool Simulation::removeBody(int bodyID) {
 
 }
 
-void Simulation::addCube() {
-    if (Num_Trimeshes == 0) {
-        Body_trimesh cube = Body_trimesh("meshes/cube.poly");
-        //cube.scale(2.0); 
-        cube.setVelocity(0.5,0.,0.,1,2,.3);
-        cube.initializeGL(); 
-        cube.setQuaternion(.9888, .0399, .0799, .1198); 
-        cube.updateWorld_Verts();
-        cube.setName("c1");
-        cube.setPosition(-0.0, 0.0, 0.0);
-        this->addBody(cube);
-    }
-    else {
-        Body_trimesh cube = Body_trimesh("meshes/cube.poly");
-        cube.scale(5.0); 
-        cube.setPosition(12.0, -4.0, 0.0);
-        cube.setVelocity(-0.3,0.,0.,1,2,.3);
-        cube.initializeGL(); 
-        cube.setQuaternion(.9888, .0399, .0799, .1198); 
-        cube.updateWorld_Verts();
-        cube.setName("c2"); 
-        this->addBody(cube);
-    }
-   
-     
-}
-
 void Simulation::addSphere() {
     Body_sphere sphere = Body_sphere();
     
@@ -188,9 +169,56 @@ void Simulation::addSphere() {
         sphere.setStatic(true); 
         sphere.setName("s1"); 
     }
+    this->addBody(sphere);  
+}
+
+void Simulation::addTetrahedron() {
+    Body_trimesh tetrahedron = Body_trimesh("meshes/tetrahedron.poly");
+    this->addBody(tetrahedron); 
+}
+
+void Simulation::addCube() {
+    if (Num_Trimeshes == 0) {
+        Body_trimesh cube = Body_trimesh("meshes/cube.poly");
+        //cube.scale(2.0); 
+        cube.setVelocity(0.5,0.,0.,1,2,.3);
+        cube.initializeGL(); 
+        cube.setQuaternion(.9888, .0399, .0799, .1198); 
+        cube.updateWorld_Verts();
+        cube.setName("c1");
+        cube.setPosition(-0.0, 0.0, 0.0);
+        this->addBody(cube);
+    }
+    else {
+        Body_trimesh cube = Body_trimesh("meshes/cube.poly");
+        cube.scale(5.0); 
+        cube.setPosition(12.0, -4.0, 0.0);
+        cube.setVelocity(-0.3,0.,0.,1,2,.3);
+        cube.initializeGL(); 
+        cube.setQuaternion(.9888, .0399, .0799, .1198); 
+        cube.updateWorld_Verts();
+        cube.setName("c2"); 
+        this->addBody(cube);
+    }
+}
+
     
-    this->addBody(sphere); 
-    
+void Simulation::addOctahedron() {
+    Body_trimesh octahedron = Body_trimesh("meshes/octahedron.poly");
+    this->addBody(octahedron); 
+}
+void Simulation::addDodecahedron() {
+    Body_trimesh dodecahedron = Body_trimesh("meshes/dodecahedron.poly");
+    this->addBody(dodecahedron);   
+}
+void Simulation::addIcosahedron() {
+    Body_trimesh icosahedron = Body_trimesh("meshes/icosahedron.poly");
+    this->addBody(icosahedron);   
+}
+void Simulation::addTeaPot() {
+    Body_trimesh teapot = Body_trimesh("meshes/teapot.poly");
+    this->addBody(teapot);   
+    cout << "teapot added" << endl; 
 }
 
 void Simulation::setRun(bool r) {

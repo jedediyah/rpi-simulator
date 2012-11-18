@@ -37,8 +37,13 @@ public:
     
     bool removeBody(int bodyID); 
     
-    void addCube(); 
     void addSphere();
+    void addTetrahedron();
+    void addCube();
+    void addOctahedron();
+    void addDodecahedron();
+    void addIcosahedron();
+    void addTeaPot();
     
     void printBodies();
     
