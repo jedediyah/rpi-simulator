@@ -25,7 +25,7 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
                  Body_trimesh *trimeshes, int &num_trimeshes, 
                  int &nb, int &nc, double &h) {
     
-    int nd = 5;  // Number of friction directions in discretized friction cone
+    int nd = 7;  // Number of friction directions in discretized friction cone
     
     /////////////////////////////////////
     // Initialize submatrices 

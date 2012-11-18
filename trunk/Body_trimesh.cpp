@@ -11,11 +11,18 @@
 #include <GL/gl.h>
 #include "Body_trimesh.h"
 #include "Body_object.h"
+#include <armadillo>
 
 using namespace std; 
+using namespace arma; 
 
 string processString(string s); 
 double strGetN(string s, int n);
+vec::fixed<3> vert0;
+vec::fixed<3> vert1; 
+vec::fixed<3> edge0;
+vec::fixed<3> edge1; 
+vec::fixed<3> face_norm; 
 
 Body_trimesh::Body_trimesh() {
 }
@@ -128,27 +135,37 @@ string processString(string s) {
         c = s.at(n);
         if (c >= 48 && c <= 57)
             continue;
-        if (c!=43 && c!=45 && c!=46 && c!=32)
+        if (c!=43 && c!=45 && c!=46 && c!=32 && c!=9) // + - . [tab]
             break;
     }
     return s.substr(0,n); 
 }
 
+bool validChar(char c) {
+    if (c>=48 && c<=57) return true; // 0 through 9
+    if (c==43 || c==45 || c==46) return true; // + - . 
+    return false; 
+}
+
 // Returns a double of the nth number in the space-separated string
 double strGetN(string s, int n) {
+    s += "  ";  // Pad the string for the sf test below
     char c;
     int si=0, sf=1;
+    for(;!validChar(s.at(si));si++); // Skip leading spaces
     while (n>0 && si < s.length()) {    // Find si
-        c = s.at(si++);
-        if (c == 32) 
+        for(;!validChar(s.at(si));si++); // Skip spaces
+        for(;validChar(s.at(si));si++);  // Increment si
             n--; 
     }
+    for(;!validChar(s.at(si));si++); // Skip spaces
     sf = si+1; 
-    while (sf < s.length()) {           // Find sf
-        c = s.at(sf++); 
-        if (c == 32)
-            break;
-    }
+    for(;validChar(s.at(sf));sf++);  // Increment sf
+
+//    cout << "String: " << "'" << s << "'" << endl;
+//    cout << "n: " << n << endl;
+//    cout << "si,sf = " << si << ", " << sf << endl;
+//    cout << "Returning: " << "'" << s.substr(si,sf-si).c_str() << "'" << endl;
     return atof(s.substr(si,sf-si).c_str());
 }
 
@@ -180,6 +197,7 @@ void Body_trimesh::scale(double s) {
         Local_Verts[3*v+2] = Local_Verts[3*v+2] * s;
     }
     this->updateWorld_Verts();
+    // TODO: should also update inertia
 }
 
 void Body_trimesh::updateWorld_Verts() {
@@ -282,10 +300,30 @@ void Body_trimesh::draw() {
  
     // Don't need to transform since we have the world coordinates.
     // Draw each face
+    int vdex;
     for (int f=0; f<Num_Faces; f++) {
+        // Face normal
+        vdex = Faces[f].vert_indicies()[0]; 
+        vert0[0] = World_Verts[3*vdex+0];
+        vert0[1] = World_Verts[3*vdex+1];
+        vert0[2] = World_Verts[3*vdex+2];
+        
+        vdex = Faces[f].vert_indicies()[1];
+        vert1[0] = World_Verts[3*vdex+0];
+        vert1[1] = World_Verts[3*vdex+1];
+        vert1[2] = World_Verts[3*vdex+2];
+        edge0 = vert1-vert0;
+        
+        vdex = Faces[f].vert_indicies()[2];
+        vert0[0] = World_Verts[3*vdex+0];
+        vert0[1] = World_Verts[3*vdex+1];
+        vert0[2] = World_Verts[3*vdex+2];
+        edge1 = vert0-vert1;
+        face_norm = cross(edge0, edge1);
        glBegin(GL_POLYGON);
+          glNormal3f(face_norm[0],face_norm[1],face_norm[2]);  // Normal for lighting 
           for (int v=0; v<Faces[f].num_verts(); v++) {
-            int vdex = Faces[f].vert_indicies()[v]; 
+            vdex = Faces[f].vert_indicies()[v]; 
             double vx = World_Verts[ 3*vdex+0 ];
             double vy = World_Verts[ 3*vdex+1 ];
             double vz = World_Verts[ 3*vdex+2 ]; // Should ALWAYS be a tri-face
