@@ -11,6 +11,7 @@
 #include "Body_sphere.h"
 #include "CollisionDetection.h"
 #include "Contact.h"
+#include "SimulatorDefenitions.h"
 
 #ifndef SIMULATION_H
 #define	SIMULATION_H
@@ -45,6 +46,12 @@ public:
     bool isRunning();
     void step();
     
+    void setActiveBody(int body_type, int body_index);
+    void setActiveBodyPosition(vec u);
+    vec activeBodyPosition(); 
+    int activeBody_type();
+    int activeBody_index(); 
+    
     
 private:
     
@@ -66,6 +73,10 @@ private:
     Contact Contacts[1000];  // Since not dynamic, be careful to not overfill...
     int num_contacts;
     int num_subcontacts;
+    
+    
+    int ActiveBody_Type;
+    int ActiveBody_Index; 
     
 
 };
