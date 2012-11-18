@@ -36,9 +36,34 @@ Simulation::~Simulation() {
 //void Simulation::setParent(SimulationEnvironment parent) { PARENT = parent; }
 //SimulationEnvironment Simulation::parent() { return PARENT; }
 
-int Simulation::num_bodies() { return Num_Bodies; }
-int Simulation::num_spheres() { return Num_Spheres; }
-int Simulation::num_trimeshes() { return Num_Trimeshes; }
+int Simulation::num_bodies()            { return Num_Bodies; }
+int Simulation::num_spheres()           { return Num_Spheres; }
+int Simulation::num_trimeshes()         { return Num_Trimeshes; }
+
+void Simulation::setActiveBody( int body_type, int body_index ) {
+    ActiveBody_Type = body_type;
+    ActiveBody_Index = body_index; 
+}
+
+void Simulation::setActiveBodyPosition(vec u) {
+    if (ActiveBody_Type == SPHERE) {
+        Sphere_Bodies[ActiveBody_Index].setPosition(u[0],u[1],u[2]); 
+    }
+    else if (ActiveBody_Type == TRIMESH) {
+        Trimesh_Bodies[ActiveBody_Index].setPosition(u[0],u[1],u[2]); 
+    }
+}
+vec Simulation::activeBodyPosition()    { 
+    if (ActiveBody_Type == SPHERE) {
+                //cout<<"U: "<<endl; Sphere_Bodies[ActiveBody_Index].u().print(); 
+        return Sphere_Bodies[ActiveBody_Index].u();
+    }
+    else if (ActiveBody_Type == TRIMESH) {
+        return Trimesh_Bodies[ActiveBody_Index].u();
+    }
+}
+int Simulation::activeBody_type()       { return ActiveBody_Type; }
+int Simulation::activeBody_index()      { return ActiveBody_Index; }
 
 void Simulation::printBodies() {
     
@@ -87,6 +112,8 @@ bool Simulation::addBody(Body_object &body) {
 
 // Add SPHERE
 bool Simulation::addBody(Body_sphere &body) {
+    ActiveBody_Type = SPHERE;
+    ActiveBody_Index = Num_Spheres; 
     Sphere_Bodies[Num_Spheres++] = body;
     TotalBodyCount++;
     return true;
@@ -94,6 +121,8 @@ bool Simulation::addBody(Body_sphere &body) {
 
 // Add TRIMESH
 bool Simulation::addBody(Body_trimesh &body) {
+    ActiveBody_Type = TRIMESH;
+    ActiveBody_Index = Num_Trimeshes; 
     Trimesh_Bodies[Num_Trimeshes++] = body; 
     TotalBodyCount++;
     return true;

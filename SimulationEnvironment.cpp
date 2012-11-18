@@ -6,6 +6,7 @@
  */
 
 #include "SimulationEnvironment.h"
+#include "SimulatorDefenitions.h"
 
 #include <cmath>
 //#define ARMA_NO_DEBUG    // TODO: add for optimization
@@ -29,8 +30,7 @@
 #define Ctrl 2
 #define ShiftCtrl 3
 
-#define TRIMESH 0       // For marking active object type
-#define SPHERE 1
+
 
 #define objMOVE 1       // Classifies how to move active object
 #define objMOVE_X 2
@@ -44,7 +44,6 @@ static pthread_t simThread;
 static int rc; 
 static bool wireframe = false; 
 double gridColor[] = {0.5, 0.5, 0.5};
-int addState = 0;               // State machine for adding objects
 int activeBody_type;
 int activeBody_index; 
 
@@ -52,6 +51,7 @@ vec::fixed<3> Camera;
 vec::fixed<3> CameraPrev; 
 vec::fixed<3> CamLookAt = zeros(3); 
 vec::fixed<3> CamLookAtPrev = zeros(3); 
+vec::fixed<3> Z = zeros(3); 
 // Mouse rotation and zoom 
 bool   enableMouseRotation = false; 
 bool   enableMouseTranslation = false; 
@@ -82,6 +82,7 @@ void initializeGL(int argc, char **argv);
 void worldLighting();
 void mousePressEvent(int button, int state, int x, int y);
 void mouseMoveEvent(int x, int y);
+void updateLookVectors();
 void updateCameraPosition();
 void mousePassiveMoveEvent(int x, int y);
 
@@ -103,17 +104,15 @@ SimulationEnvironment::~SimulationEnvironment() {
 }
 
 void menuMain(int id) {
-    cout << "Main Menu, " << id << endl;
+    //cout << "Main Menu, " << id << endl;
 }
 void menuAddObject(int objID) {
     cout << "Add Object... [" << objID << "]" << endl; 
     switch(objID) {
         case 1:
             //cout << "Adding sphere" << endl;
-            activeBody_index = SIM.num_spheres();
             SIM.addSphere(); 
-            activeBody_type = SPHERE; 
-            cout << activeBody_index << endl; 
+            cout << SIM.activeBody_type() << ", " << SIM.activeBody_index() << endl; 
             break;
         case 2: 
             cout << "Adding tetrahedron" << endl;
@@ -132,7 +131,7 @@ void menuAddObject(int objID) {
             break;
             
     }
-    addState = 1;
+    drawScene();  
     
 }
 
@@ -161,7 +160,6 @@ void makeMenu(void)
    glutAddMenuEntry("Icosahedron",6);
    
    imenuQuit = glutCreateMenu(menuQuit);
-
 
    // The top menu is created: its callback function is registered and menu entries,
    // including a submenu, added.
@@ -194,11 +192,12 @@ void initializeGL(int argc, char **argv)
     
     makeMenu(); 
     
-    CamInit[0]=-10.0;           CamInit[1]=-14.3205;           CamInit[2]=12.0;
+    CamInit[0]=-10.0;       CamInit[1]=-14.3205;    CamInit[2]=12.0;
     Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2]; 
-    
+    updateLookVectors();
     drawScene();
     
+    Z[2] = 1.0; 
     
 //    SIM.addCube();      // TODO
 //    SIM.addCube();
@@ -389,11 +388,6 @@ void resize(int width, int height)
    
 }
 
-void SimulationEnvironment::test(unsigned char key) {
-    cout << "Class Press: " << key << endl;
-}
-
-
 void *runSim(void *threadid)
 {
     
@@ -411,7 +405,6 @@ void *runSim(void *threadid)
    
    pthread_exit(NULL);
 }
-
 
 // Keyboard input processing routine.
 void keyInput(unsigned char key, int x, int y)
@@ -449,15 +442,35 @@ void keyInput(unsigned char key, int x, int y)
            drawScene();
            break;
            
-       case 103: // g
-           
+       case 103: // g   Move object
+           obj_Ui = SIM.activeBodyPosition(); 
+           camXi = x;
+           camYi = y;
+           enableObjectMove = true; 
+           //cout << "Start moving object..." << endl; 
            break;
            
-       case 113: // q
+       case 120: // x   Move object on x axis
+           
+           break;
+       case 121: // y   Move object on y axis
+           
+           break;
+       case 122: // z   Move object on z axis 
+           
+           break; 
+           
+       case 113: // q   quit
            exit(0);
            break; 
-       case 27: // [ESC]
-           exit(0);
+
+       case 27: // [ESC]   Cancels whatever action is being done
+           if(enableObjectMove) {
+               enableObjectMove =! enableObjectMove; 
+               // Put active object back where it started 
+               SIM.setActiveBodyPosition(obj_Ui); 
+               drawScene(); 
+           }
            break;
        default:
            break;
@@ -494,15 +507,7 @@ void mousePressEvent(int button, int state, int x, int y)
         CamLookAtPrev = CamLookAt; 
         CameraPrev = Camera; 
         
-        vec Z = zeros(3);
-        Z.at(2) = 1.0; 
-        CamLook = CamLookAt - Camera;  
-        CamRight = cross(CamLook,Z); 
-        CamUp = cross(CamRight,CamLook);
-        
-        CamLook = CamLook / norm(CamLook,2);        // Normalize vectors
-        CamRight = CamRight / norm(CamRight,2); 
-        CamUp = CamUp / norm(CamUp,2); 
+        updateLookVectors();   // This might not be necessary here 
         
         enableMouseTranslation = true; 
     }
@@ -510,6 +515,11 @@ void mousePressEvent(int button, int state, int x, int y)
     else if ((button == LeftClick || button == MiddleClick) && state == 1 ) {
         enableMouseRotation = false; 
         enableMouseTranslation = false; 
+        updateLookVectors(); 
+    }
+    else if (button == LeftClick) {
+        if (enableObjectMove) 
+            enableObjectMove = !enableObjectMove; // Placing a moving object
     }
     // Zoom in
     else if (button == 3) {
@@ -527,29 +537,48 @@ void mousePressEvent(int button, int state, int x, int y)
         updateCameraPosition(); // Update camera position 
         drawScene();            // Redraw from new camera position 
     }
-}
+} 
 
 void mouseMoveEvent(int x, int z)
 {
     if (enableMouseRotation) {
         CamXrot = camRXp + (camYi-z)*rotScale;  // TODO limit within range 
         CamZrot = camRYp + (camXi-x)*rotScale; 
-        updateCameraPosition();  
+        updateCameraPosition();  // TODO: Not necessary here?
     }
     else if (enableMouseTranslation) {
         double dz = camYi-z;
         double dx = x-camXi; 
-        
-        cout << "dx: " << dx << endl;
-        cout << "dz: " << dz << endl; 
         double tfact = 100.0;  // Translation factor.  
         Camera = CameraPrev - CamRight*(dx/tfact) - CamUp*(dz/tfact);
         CamLookAt = CamLookAtPrev - CamRight*(dx/tfact) - CamUp*(dz/tfact);
         drawScene(); 
     }
-    else if (enableObjectMove) {
+}
+
+void mousePassiveMoveEvent(int x, int z) {
+    //cout << "Passive Move " << x << ", " << y << endl;
+    if (enableObjectMove) {
+        double dz = camYi-z;
+        double dx = x-camXi; 
         
+        // Move object
+        vec Unew = obj_Ui + CamRight*(dx/100.0) + CamUp*(dz/100.0);
+        //Unew.print(); 
+        SIM.setActiveBodyPosition(Unew); 
+        drawScene(); 
     }
+}
+
+// Update the vectors that describe the camera view
+void updateLookVectors() {
+        CamLook = CamLookAt - Camera;  
+        CamRight = cross(CamLook,Z); 
+        CamUp = cross(CamRight,CamLook);
+        
+        CamLook = CamLook / norm(CamLook,2);        // Normalize vectors
+        CamRight = CamRight / norm(CamRight,2); 
+        CamUp = CamUp / norm(CamUp,2); 
 }
 
 void updateCameraPosition() {
@@ -577,17 +606,12 @@ void updateCameraPosition() {
     zi(2,0) = CamInit[2] * camZoomFactor; 
     
     mat r = Rz*Rx*zi;   
-    Camera.at(0) = r(0) + CamLookAt.at(0);
-    Camera.at(1) = r(1) + CamLookAt.at(1);
-    Camera.at(2) = r(2) + CamLookAt.at(2); 
+    Camera[0] = r(0) + CamLookAt[0];
+    Camera[1] = r(1) + CamLookAt[1];
+    Camera[2] = r(2) + CamLookAt[2]; 
     
     drawScene();
 }
-
-void mousePassiveMoveEvent(int x, int y) {
-    //cout << "Passive Move " << x << ", " << y << endl;
-}
-
 
 // Main method 
 int SimulationEnvironment::start() {
