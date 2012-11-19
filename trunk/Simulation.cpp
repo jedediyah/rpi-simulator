@@ -144,31 +144,31 @@ bool Simulation::removeBody(int bodyID) {
 void Simulation::addSphere() {
     Body_sphere sphere = Body_sphere();
     
-    if ( Num_Spheres == 1 ) {
-        sphere.setRadius(1.0);
-        sphere.setPosition(0, 0, 7);
-        sphere.setName("s2"); 
-        sphere.setFext(0,0,-9.8,0,0,0);
-        //sphere.setQuaternion(.0707, .2666, .5332, .7998);
-    }
-    else if (Num_Spheres == 2 ) {
-        sphere.setRadius(1.0);
-        sphere.setPosition(-.3,0,10.3);
-        sphere.setName("s3"); 
-        sphere.setFext(0,0,-9.8,0,0,0);
-        //sphere.setVelocity(0,2,0,0,0,0);
-        //sphere.setStatic(true); 
-    }
-    else {
-//        sphere.setPosition(-14,-5,4.0);
-//        sphere.setRadius(3.0);
-        sphere.setVelocity(0,0,0,0,0,0);
-        sphere.setPosition(.2,0,3.5);
-        //sphere.setFext(0,0,-9.8,0,0,0);
-        sphere.setRadius(1.5);
-        sphere.setStatic(true); 
-        sphere.setName("s1"); 
-    }
+//    if ( Num_Spheres == 1 ) {
+//        sphere.setRadius(1.0);
+//        sphere.setPosition(0, 0, 7);
+//        sphere.setName("s2"); 
+//        sphere.setFext(0,0,-9.8,0,0,0);
+//        //sphere.setQuaternion(.0707, .2666, .5332, .7998);
+//    }
+//    else if (Num_Spheres == 2 ) {
+//        sphere.setRadius(1.0);
+//        sphere.setPosition(-.3,0,10.3);
+//        sphere.setName("s3"); 
+//        sphere.setFext(0,0,-9.8,0,0,0);
+//        //sphere.setVelocity(0,2,0,0,0,0);
+//        //sphere.setStatic(true); 
+//    }
+//    else {
+////        sphere.setPosition(-14,-5,4.0);
+////        sphere.setRadius(3.0);
+//        sphere.setVelocity(0,0,0,0,0,0);
+//        sphere.setPosition(.2,0,3.5);
+//        //sphere.setFext(0,0,-9.8,0,0,0);
+//        sphere.setRadius(1.5);
+//        sphere.setStatic(true); 
+//        sphere.setName("s1"); 
+//    }
     this->addBody(sphere);  
 }
 
@@ -178,28 +178,30 @@ void Simulation::addTetrahedron() {
 }
 
 void Simulation::addCube() {
-    if (Num_Trimeshes == 0) {
-        Body_trimesh cube = Body_trimesh("meshes/cube.poly");
-        //cube.scale(2.0); 
-        cube.setVelocity(0.5,0.,0.,1,2,.3);
-        cube.initializeGL(); 
-        cube.setQuaternion(.9888, .0399, .0799, .1198); 
-        cube.updateWorld_Verts();
-        cube.setName("c1");
-        cube.setPosition(-0.0, 0.0, 0.0);
-        this->addBody(cube);
-    }
-    else {
-        Body_trimesh cube = Body_trimesh("meshes/cube.poly");
-        cube.scale(5.0); 
-        cube.setPosition(12.0, -4.0, 0.0);
-        cube.setVelocity(-0.3,0.,0.,1,2,.3);
-        cube.initializeGL(); 
-        cube.setQuaternion(.9888, .0399, .0799, .1198); 
-        cube.updateWorld_Verts();
-        cube.setName("c2"); 
-        this->addBody(cube);
-    }
+//    if (Num_Trimeshes == 0) {
+//        Body_trimesh cube = Body_trimesh("meshes/cube.poly");
+//        //cube.scale(2.0); 
+//        cube.setVelocity(0.5,0.,0.,1,2,.3);
+//        cube.initializeGL(); 
+//        cube.setQuaternion(.9888, .0399, .0799, .1198); 
+//        cube.updateWorld_Verts();
+//        cube.setName("c1");
+//        cube.setPosition(-0.0, 0.0, 0.0);
+//        this->addBody(cube);
+//    }
+//    else {
+//        Body_trimesh cube = Body_trimesh("meshes/cube.poly");
+//        cube.scale(5.0); 
+//        cube.setPosition(12.0, -4.0, 0.0);
+//        cube.setVelocity(-0.3,0.,0.,1,2,.3);
+//        cube.initializeGL(); 
+//        cube.setQuaternion(.9888, .0399, .0799, .1198); 
+//        cube.updateWorld_Verts();
+//        cube.setName("c2"); 
+//        this->addBody(cube);
+//    }
+    Body_trimesh cube = Body_trimesh("meshes/cube.poly");
+    this->addBody(cube);
 }
 
     

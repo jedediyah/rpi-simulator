@@ -36,7 +36,9 @@
 #define objMOVE_Z 4
 
 // Global variables
-static GLsizei width, height;   // OpenGL window size.
+static GLsizei width = 1200;    // OpenGL window size.
+static GLsizei height = 900;   
+static GLsizei edge_buffer = 3; // Buffering text near panel edges
 int LeftPanelWidth = 200; 
 static Simulation SIM;          // Instance of simulator
 static pthread_t simThread; 
@@ -68,7 +70,7 @@ double CamZrot;
 double camRXp, camRYp; 
 double camXi, camYi;
 double camZoomFactor = 1.0;     // Change of 10% every zoom
-double ovjMoveFactor = 40.0;    // Smaller -> faster reaction when moving object
+double objMoveFactor = 40.0;    // Smaller -> faster reaction when moving object
 
 // Mouse translation 
 vec CamLook;
@@ -187,7 +189,7 @@ void initializeGL(int argc, char **argv)
     // GLUT
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE);  // Double buffer (gets rid of flickering)
-    glutInitWindowSize(1000, 900);
+    glutInitWindowSize(width, height);
     glutInitWindowPosition(300, 100); 
     glutCreateWindow("RPI - Simulator");
     glutDisplayFunc(drawScene); 
@@ -200,7 +202,7 @@ void initializeGL(int argc, char **argv)
     glEnable(GL_DEPTH_TEST);    // Enable depth testing.
     glEnable(GL_SCISSOR_TEST);  // For separating the viewports. 
     
-    CamInit[0]=-10.0;       CamInit[1]=-14.3205;    CamInit[2]=12.0;
+    CamInit[0]=-6.0;        CamInit[1]=-10.3205;    CamInit[2]=6.0;
     Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2]; 
     X[0] = 1.0;             Y[1] = 1.0;             Z[2] = 1.0;  // Unit vectors
     
@@ -356,35 +358,34 @@ void worldLighting() {
     glEnable(GL_LIGHTING);
 }
 
+// Draw the panel on the left
 void draw_PANEL_left() {
-    glEnable(GL_SCISSOR_TEST);
     glViewport(0,0,LeftPanelWidth,height); 
     glScissor(0,0,LeftPanelWidth,height);
-    glClearColor(0.2529f, 0.2529f, 0.3529f, 0.f);
+    glClearColor(0.4453f, 0.4453f, 0.4453f, 0.f);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clear
     
-    
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(-LeftPanelWidth/2.0, LeftPanelWidth/2.0, 
-                -LeftPanelWidth/2.0, LeftPanelWidth/2.0, 
-                -100.0, 100.0);
-        //gluPerspective(60, width/height, 0.1, 500);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-LeftPanelWidth/2.0, LeftPanelWidth/2.0, 
+            -height/2.0, height/2.0, 
+            0.0, 1.0);
 
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     
-    glColor3f(0.8,0.8,1.0);
-    glRasterPos3f(0.0,0.0,0.0); 
+    glDisable(GL_LIGHTING);  // Don't light text 
+    glColor3f(0.0,0.0,0.0);  // Black font
+    glRasterPos3f(-LeftPanelWidth/2.0 + edge_buffer,height/2.0-15,0.0); 
     writeBitmapString((void*)font, "Test string here...");
 }
 
+// Draw the main panel, including the simulated bodies
 void draw_PANEL_main() {
-    glEnable(GL_SCISSOR_TEST);
     glViewport(LeftPanelWidth,0,width-LeftPanelWidth,height);
     glScissor(LeftPanelWidth,0,width-LeftPanelWidth,height);
-    //glClearColor(0.1529f, 0.1529f, 0.1529f, 1.f);   // Blender color
-    glClearColor(0.2529f, 0.2529f, 0.2529f, 0.f);
+    glClearColor(0.2235f, 0.2235f, 0.2235f, 1.0f);   // Blender color
+    //glClearColor(0.2529f, 0.2529f, 0.2529f, 0.f);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clear
     
     // Wire-frame or not
@@ -393,6 +394,13 @@ void draw_PANEL_main() {
     else
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+    glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(60.0,
+                       ((double)width-(double)LeftPanelWidth)/(double)height,
+                       0.1,
+                       500);
+    
     // Rotate camera
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -414,14 +422,8 @@ void draw_PANEL_main() {
 // Drawing routine.
 void drawScene(void)
 {  
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clear
-    //glColor3f(1.0, 1.0, 0.5);     // Color of objects
-
-    //glPushMatrix();
-        draw_PANEL_main();
-    //glPopMatrix();
-    
-    //draw_PANEL_left();
+    draw_PANEL_main();
+    draw_PANEL_left();
     
     glutSwapBuffers();
 }
@@ -432,19 +434,6 @@ void resize(int w, int h)
 {
     width = w; 
     height = h;
-    //glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // Only update the main viewport, not the peripheral panels.  
-    glViewport(LeftPanelWidth,0,width-LeftPanelWidth,height);
-    glScissor(LeftPanelWidth,0,width-LeftPanelWidth,height);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        //glOrtho(-20.0, 20.0, -20.0, 20.0, -100.0, 100.0);
-        gluPerspective(60, width/height, 0.1, 500);
-
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-   
 }
 
 // Function pointer to serve as an independent thread 
@@ -604,15 +593,15 @@ void mousePressEvent(int button, int state, int x, int y)
 
 void mouseMoveEvent(int x, int z)
 {
-    if (enableMouseRotation) {
+    if (enableMouseRotation) {          // Rotate entire scene
         CamXrot = camRXp + (camYi-z)*rotScale;  // TODO limit within range 
         CamZrot = camRYp + (camXi-x)*rotScale; 
         updateCameraPosition();  // TODO: Not necessary here?
     }
-    else if (enableMouseTranslation) {
+    else if (enableMouseTranslation) {  // Translate entire scene
         dz = camYi-z;
         dx = x-camXi; 
-        double tfact = 70.0;  // Translation factor.  
+        double tfact = 70.0/camZoomFactor;  // Translation factor.  
         Camera = CameraPrev - CamRight*(dx/tfact) - CamUp*(dz/tfact);
         CamLookAt = CamLookAtPrev - CamRight*(dx/tfact) - CamUp*(dz/tfact);
         drawScene(); 
@@ -623,28 +612,28 @@ void mousePassiveMoveEvent(int x, int z) {
     if (enableObjectMove && moveState == objMOVE) { // Move object tangent to camera
         dz = camYi-z;   
         dx = x-camXi; 
-        vec Unew = obj_Ui + CamRight*(dx/ovjMoveFactor) + CamUp*(dz/ovjMoveFactor);
+        vec Unew = obj_Ui + CamRight*(dx/objMoveFactor*camZoomFactor) + CamUp*(dz/objMoveFactor*camZoomFactor);
         SIM.setActiveBodyPosition(Unew); 
         drawScene(); 
     }
     else if (enableObjectMove && moveState == objMOVE_X) { // Move object on X axis
         dz = camYi-z;   
         dx = x-camXi; 
-        vec Unew = obj_Ui + X*(dx/ovjMoveFactor);
+        vec Unew = obj_Ui + X*(dx/objMoveFactor*camZoomFactor);
         SIM.setActiveBodyPosition(Unew); 
         drawScene(); 
     }
     else if (enableObjectMove && moveState == objMOVE_Y) { // Move object on Y axis
         dz = camYi-z;   
         dx = x-camXi; 
-        vec Unew = obj_Ui + Y*(dx/ovjMoveFactor);
+        vec Unew = obj_Ui + Y*(dx/objMoveFactor*camZoomFactor);
         SIM.setActiveBodyPosition(Unew); 
         drawScene(); 
     }
     else if (enableObjectMove && moveState == objMOVE_Z) { // Move object on Z axis
         dz = camYi-z;   
         dx = x-camXi; 
-        vec Unew = obj_Ui + Z*(dz/ovjMoveFactor);
+        vec Unew = obj_Ui + Z*(dz/objMoveFactor*camZoomFactor);
         SIM.setActiveBodyPosition(Unew); 
         drawScene(); 
     }
