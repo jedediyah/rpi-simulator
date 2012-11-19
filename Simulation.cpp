@@ -216,7 +216,7 @@ void Simulation::addIcosahedron() {
     this->addBody(icosahedron);   
 }
 void Simulation::addTeaPot() {
-    Body_trimesh teapot = Body_trimesh("meshes/teapot.poly");
+    Body_trimesh teapot = Body_trimesh("meshes/teapot2.obj");
     this->addBody(teapot);   
     cout << "teapot added" << endl; 
 }
