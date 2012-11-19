@@ -104,8 +104,8 @@ Body_trimesh::Body_trimesh(string filename) {
                     if (v==temp_verts[0] || v==temp_verts[1] || v==temp_verts[2])
                         Verts[v].add_FaceIndex(face_counter); 
                 }
+                face_counter++; 
             }
-            face_counter++; 
         }
     }
     
