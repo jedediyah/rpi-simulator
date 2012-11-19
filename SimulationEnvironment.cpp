@@ -39,13 +39,16 @@
 static GLsizei width = 1200;    // OpenGL window size.
 static GLsizei height = 900;   
 static GLsizei edge_buffer = 3; // Buffering text near panel edges
-int LeftPanelWidth = 200; 
+GLsizei LeftPanelWidth = 200; 
+GLsizei InfoPanelWidth = 180; 
+GLsizei InfoPanelHeight = 130; 
 static Simulation SIM;          // Instance of simulator
 static pthread_t simThread; 
 static int rc; 
 static bool wireframe = false; 
 double gridColor[] = {0.5, 0.5, 0.5};
-static long font = (long)GLUT_BITMAP_8_BY_13; // Font selection.
+static long font = (long)GLUT_BITMAP_8_BY_13; // Font selection. 
+static long font_simInfo = (long)GLUT_BITMAP_HELVETICA_10;
 int activeBody_type;
 int activeBody_index; 
 
@@ -419,10 +422,33 @@ void draw_PANEL_main() {
     SIM.draw(wireframe);        // Simulation objects
 }
 
+// Display information about simulation properties, e.g. solver time, framerate, etc.
+void draw_PANEL_simInfo() {
+    glViewport(LeftPanelWidth, height-InfoPanelHeight, InfoPanelWidth, InfoPanelHeight);
+    glScissor(LeftPanelWidth, height-InfoPanelHeight, InfoPanelWidth, InfoPanelHeight);
+//    glClearColor(0.2529f, 0.2529f, 0.2529f, 0.f);
+//    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clear
+    
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-InfoPanelWidth/2.0, InfoPanelWidth/2.0, 
+            -InfoPanelWidth/2.0, InfoPanelWidth/2.0, 
+            0.0, 1.0);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
+    glDisable(GL_LIGHTING);  // Don't light text 
+    glColor3f(1.0,1.0,1.0);  // Black font
+    glRasterPos3f(-InfoPanelWidth/2.0 + edge_buffer, InfoPanelHeight/2.0+9, 0.0); 
+    writeBitmapString((void*)font_simInfo, "Sim info...");
+}
+
 // Drawing routine.
 void drawScene(void)
 {  
     draw_PANEL_main();
+    draw_PANEL_simInfo();
     draw_PANEL_left();
     
     glutSwapBuffers();

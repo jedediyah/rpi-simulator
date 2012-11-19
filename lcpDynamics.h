@@ -217,7 +217,10 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     for (int i=nc; i<nc+nd*nc; i++)
         Pf.at(i-nc) = z0[i]; 
 
-    return NU + MinvGn*Pn + MinvGf*Pf + MinvPext; 
+//    vec RESULT = NU + MinvGn*Pn + MinvGf*Pf + MinvPext; 
+//    RESULT.print();
+//    return RESULT;  
+    return NU + MinvGn*Pn + MinvGf*Pf + MinvPext;
     
 }
 
