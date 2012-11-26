@@ -39,18 +39,18 @@
 static GLsizei width = 1200;    // OpenGL window size.
 static GLsizei height = 900;   
 static GLsizei edge_buffer = 3; // Buffering text near panel edges
-GLsizei LeftPanelWidth = 200; 
-GLsizei InfoPanelWidth = 180; 
-GLsizei InfoPanelHeight = 130; 
+static GLsizei LeftPanelWidth = 200; 
+static GLsizei InfoPanelWidth = 180; 
+static GLsizei InfoPanelHeight = 130; 
 static Simulation SIM;          // Instance of simulator
-static pthread_t simThread; 
-static int rc; 
+static pthread_t simThread;     // For multithreading the simulator
+static int rc;                  // Used for simThread
 static bool wireframe = false; 
-double gridColor[] = {0.5, 0.5, 0.5};
-static long font = (long)GLUT_BITMAP_8_BY_13; // Font selection. 
+static double gridColor[] = {0.5, 0.5, 0.5};
+static long font_left_panel = (long)GLUT_BITMAP_HELVETICA_10; // Font selection. 
 static long font_simInfo = (long)GLUT_BITMAP_HELVETICA_10;
-int activeBody_type;
-int activeBody_index; 
+//static int activeBody_type;            // The active body type e.g. sphere, mesh, etc.
+//static int activeBody_index=-1; 
 
 vec::fixed<3> Camera;
 vec::fixed<3> CameraPrev; 
@@ -82,7 +82,7 @@ vec CamUp;
 
 // Mouse move object
 int moveState = 0; 
-vec obj_Ui;  // Initial position 
+vec obj_Ui;  // Initial position  
 
 // STATIC methods
 void makeMenu(void);
@@ -100,7 +100,6 @@ void mousePassiveMoveEvent(int x, int y);
 
 using namespace std;
 using namespace arma; 
-//using namespace boost; 
 
 // Constructors 
 SimulationEnvironment::SimulationEnvironment(int argc, char **argv) {
@@ -114,7 +113,9 @@ SimulationEnvironment::~SimulationEnvironment() {
 }
 
 void menuMain(int id) {
-    //cout << "Main Menu, " << id << endl;
+    cout << "Main Menu, " << id << endl;
+    if (id ==2)
+        exit(0);  // Quit
 }
 void menuAddObject(int objID) {
     //cout << "Add Object... [" << objID << "]" << endl; 
@@ -379,8 +380,29 @@ void draw_PANEL_left() {
     
     glDisable(GL_LIGHTING);  // Don't light text 
     glColor3f(0.0,0.0,0.0);  // Black font
-    glRasterPos3f(-LeftPanelWidth/2.0 + edge_buffer,height/2.0-15,0.0); 
-    writeBitmapString((void*)font, "Test string here...");
+    
+    int d = -15;
+    int os = 15; 
+    glRasterPos3f(-LeftPanelWidth/2.0 + edge_buffer,height/2.0+d,0.0); 
+    writeBitmapString((void*)font_left_panel, "Active Body Information");
+    d-=os; 
+    
+    if (SIM.activeBody_type() >= 0) {
+        // Body name
+        glRasterPos3f(-LeftPanelWidth/2.0 + edge_buffer,height/2.0+d,0.0); 
+        writeBitmapString((void*)font_left_panel, SIM.text_activeBodyName());
+        d-=os; 
+
+        // Position 
+        glRasterPos3f(-LeftPanelWidth/2.0 + edge_buffer,height/2.0+d,0.0); 
+        writeBitmapString((void*)font_left_panel, SIM.text_activeBodyPosition());
+        d-=os; 
+
+        // Quaternion 
+        glRasterPos3f(-LeftPanelWidth/2.0 + edge_buffer,height/2.0+d,0.0); 
+        writeBitmapString((void*)font_left_panel, SIM.text_activeBodyRotation());
+        d-=os; 
+    }
 }
 
 // Draw the main panel, including the simulated bodies
@@ -440,8 +462,33 @@ void draw_PANEL_simInfo() {
     
     glDisable(GL_LIGHTING);  // Don't light text 
     glColor3f(1.0,1.0,1.0);  // Black font
-    glRasterPos3f(-InfoPanelWidth/2.0 + edge_buffer, InfoPanelHeight/2.0+9, 0.0); 
-    writeBitmapString((void*)font_simInfo, "Sim info...");
+    
+    int d = 9;
+    int os = 18; 
+    
+    glRasterPos3f(-InfoPanelWidth/2.0 + edge_buffer, InfoPanelHeight/2.0+d, 0.0); 
+    writeBitmapString((void*)font_simInfo, "::: SIMULATION INFORMATION :::");
+    d-=os;
+    
+    glRasterPos3f(-InfoPanelWidth/2.0 + edge_buffer, InfoPanelHeight/2.0+d, 0.0); 
+    writeBitmapString( (void*)font_simInfo, SIM.Time_dynamics() );
+    d-=os;;
+    
+    glRasterPos3f(-InfoPanelWidth/2.0 + edge_buffer, InfoPanelHeight/2.0+d, 0.0); 
+    writeBitmapString( (void*)font_simInfo, SIM.Time_collision_detection() );
+    d-=os;
+    
+    glRasterPos3f(-InfoPanelWidth/2.0 + edge_buffer, InfoPanelHeight/2.0+d, 0.0); 
+    writeBitmapString( (void*)font_simInfo, SIM.Solver_iterations() );
+    d-=os;
+    
+    glRasterPos3f(-InfoPanelWidth/2.0 + edge_buffer, InfoPanelHeight/2.0+d, 0.0); 
+    writeBitmapString( (void*)font_simInfo, SIM.Time_kinematic_update() );
+    d-=os;
+    
+    glRasterPos3f(-InfoPanelWidth/2.0 + edge_buffer, InfoPanelHeight/2.0+d, 0.0); 
+    writeBitmapString( (void*)font_simInfo, SIM.Time_graphics() );
+    d-=os;
 }
 
 // Drawing routine.

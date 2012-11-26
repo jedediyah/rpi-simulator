@@ -12,6 +12,9 @@
 #include "CollisionDetection.h"
 #include "Contact.h"
 #include "SimulatorDefenitions.h"
+#include <time.h>
+#include <math.h>
+#include <sstream>
 
 #ifndef SIMULATION_H
 #define	SIMULATION_H
@@ -54,10 +57,21 @@ public:
     void setActiveBody(int body_type, int body_index);
     void setActiveBodyPosition(vec u);
     vec activeBodyPosition(); 
+    char* text_activeBodyName();  
+    char* text_activeBodyPosition(); 
+    char* text_activeBodyRotation();
     int activeBody_type();
     int activeBody_index(); 
     
+    void tic();
+    double toc();
     
+    char* Time_collision_detection(); 
+    char* Time_dynamics();
+    char* Time_kinematic_update();
+    char* Time_graphics();
+    char* Solver_iterations();  
+
 private:
     
     //SimulationEnvironment PARENT; won't work
@@ -79,9 +93,15 @@ private:
     int num_contacts;
     int num_subcontacts;
     
-    
     int ActiveBody_Type;
     int ActiveBody_Index; 
+    
+    // Timers for display 
+    clock_t TIME;   // For timing, used by tic() and toc()
+    double timer_collision_detection;
+    double timer_dynamics; 
+    double timer_kinematic_update; 
+    double timer_graphics;
     
 
 };
