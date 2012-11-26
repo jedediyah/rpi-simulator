@@ -16,6 +16,8 @@ class Contact {
 public:
     Contact(); 
     Contact(int contact_ID,
+            int body1_type,
+            int body2_type,
             int body1,
             int body2,
             mat normal,
@@ -25,6 +27,8 @@ public:
             mat psi,
             char *collision_type);
     Contact(int contact_ID,
+            int body1_type,
+            int body2_type,
             int body1,
             int body2,
             mat normal,
@@ -40,9 +44,11 @@ public:
     
     // Public variables
     int contact_ID;
-    int body1;
+    int body1;   // 
     int body2;
-    mat normal; 
+    int body1_type;  // Sphere, mesh, etc
+    int body2_type; 
+    mat normal;  // From body 1 to body 2
     mat tangent;
     vec r1;   // [x;y;z] Vector from body_1 COM to contact point1 in WORLD frame 
     mat r2;      // For CDA, r2 (analogous to r1) may be 3xN 

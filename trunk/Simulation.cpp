@@ -236,7 +236,9 @@ void Simulation::step() {  // dt is now step_size...
     
     // Collision detection 
     tic();
-    CD.findCollisions(Contacts, Num_Bodies, num_contacts, num_subcontacts, Sphere_Bodies, Num_Spheres); 
+    CD.findCollisions(Contacts, Num_Bodies, num_contacts, num_subcontacts, 
+                                Sphere_Bodies, Num_Spheres, 
+                                Trimesh_Bodies, Num_Trimeshes); 
     timer_collision_detection = toc();
     
     tic();
@@ -314,16 +316,16 @@ char* Simulation::text_activeBodyRotation() {
     if (ActiveBody_Type == SPHERE) {
         outputString = "Quaternion: (\n\t" + 
                 d2s(Sphere_Bodies[ActiveBody_Index].quat()[0]) + ", " +
-                d2s(Sphere_Bodies[ActiveBody_Index].quat()[0]) + ", " + 
                 d2s(Sphere_Bodies[ActiveBody_Index].quat()[1]) + ", " + 
-                d2s(Sphere_Bodies[ActiveBody_Index].quat()[2]) + ")"; 
+                d2s(Sphere_Bodies[ActiveBody_Index].quat()[2]) + ", " + 
+                d2s(Sphere_Bodies[ActiveBody_Index].quat()[3]) + ")"; 
     }
     else if (ActiveBody_Type == TRIMESH) {
          outputString = "Quaternion: (" + 
                 d2s(Trimesh_Bodies[ActiveBody_Index].quat()[0]) + ", " + 
-                d2s(Trimesh_Bodies[ActiveBody_Index].quat()[0]) + ", " +
-                d2s(Trimesh_Bodies[ActiveBody_Index].quat()[1]) + ", " + 
-                d2s(Trimesh_Bodies[ActiveBody_Index].quat()[2]) + ")"; 
+                d2s(Trimesh_Bodies[ActiveBody_Index].quat()[1]) + ", " +
+                d2s(Trimesh_Bodies[ActiveBody_Index].quat()[2]) + ", " + 
+                d2s(Trimesh_Bodies[ActiveBody_Index].quat()[3]) + ")"; 
     }
     return (char*)outputString.c_str();     
 }

@@ -20,7 +20,8 @@ public:
     virtual ~CollisionDetection();
     
     void findCollisions(Contact *Contacts, int &num_bodies, int &num_contacts, 
-                int &num_subcontacts, Body_sphere *spheres, int &num_spheres);
+                int &num_subcontacts, Body_sphere *spheres, int &num_spheres,
+                                      Body_trimesh *meshes,   int &num_meshes);
     
 private:
     

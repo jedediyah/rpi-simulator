@@ -9,6 +9,7 @@
 #include <iostream>
 #include <armadillo>
 #include <cmath>
+#include "SimulatorDefenitions.h"
 
 using namespace std;
 using namespace arma; 
@@ -35,7 +36,8 @@ mat arbitraryTangent(mat n) {
 }
 
 void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int &num_contacts, 
-                int &num_subcontacts, Body_sphere *spheres, int &num_spheres) {
+                int &num_subcontacts, Body_sphere *spheres, int &num_spheres, 
+                                      Body_trimesh *meshes,   int &num_meshes) {
     //cout << "Collision detection on " << num_spheres << " spheres..." << endl; 
     
     num_bodies = 0;
@@ -48,6 +50,10 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
     for (int s=0; s<num_spheres; s++ ) {  // spheres
         spheres[s].BodyIndex = -1; 
         spheres[s].ContactCount = 0;
+    }
+    for (int b=0; b<num_meshes; b++) {      // Trimeshes
+        meshes[b].BodyIndex = -1;
+        meshes[b].ContactCount = 0;
     }
     
     
@@ -63,7 +69,7 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
             mat t = arbitraryTangent(n);
             vec r1 = n;    // Won't be used... since ground is static.
             mat r2 = -n * spheres[s].radius(); 
-            Contact c = Contact(cID++, -3, s, n, t, r1, r2, psi);   // -3 is our special int for GROUND
+            Contact c = Contact(cID++,GROUND,SPHERE, -3, s, n, t, r1, r2, psi);   // -3 is our special int for GROUND
             Contacts[num_contacts++] = c;
 
             spheres[s].ContactCount++; // Already made sure not static 
@@ -77,7 +83,30 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
     
     ////////////////////////////////////////////////////////////////
     // MESH-GROUND collision detection
-    
+    for (int b=0; b<num_meshes; b++) {
+        if (!meshes[b].isStaticBody()) {
+            for (int v=0; v<meshes[b].num_verts(); v++) {  // For every vertex
+                
+                mat psi = zeros(1);
+                psi[0] = meshes[b].world_verts()[3*v+2];  // psi=z value
+                mat n = zeros(3, 1);
+                n.at(2) = 1.0; // Normal to sphere is always up (+z direction)
+
+                mat t = arbitraryTangent(n);
+                vec r1 = n;    // Won't be used... since ground is static.
+                mat r2 = meshes[b].world_verts()[3*v+2] - meshes[b].u(); 
+                Contact c = Contact(cID++,GROUND,TRIMESH, -3, b, n, t, r1, r2, psi);   // -3 is our special int for GROUND
+                Contacts[num_contacts++] = c;
+
+                meshes[b].ContactCount++; // Already made sure not static 
+                if (meshes[b].BodyIndex < 0) {
+                    meshes[b].BodyIndex = bID++;
+                    num_bodies++;
+                }
+                
+            }
+        }
+    }
     
     ////////////////////////////////////////////////////////////////
     // SPHERE-SPHERE collision detection
@@ -97,7 +126,7 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
                 mat t = arbitraryTangent(n); 
                 vec r1 =  n*spheres[s1].radius();
                 mat r2 = -n*spheres[s2].radius();
-                Contact c = Contact(cID++,s1,s2,n,t,r1,r2,psi);
+                Contact c = Contact(cID++,SPHERE,SPHERE,s1,s2,n,t,r1,r2,psi);
                 Contacts[num_contacts++] = c;
                 if ( !spheres[s1].isStaticBody() ) {
                     spheres[s1].ContactCount++;  

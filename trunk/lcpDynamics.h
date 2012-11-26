@@ -67,7 +67,7 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     mat r2, Gn_i2, Gf_i2;  
     for (int i=0; i<nc; i++) {
         
-        if (Contacts[i].body1 == -3) { // GROUND VERSION
+        if (Contacts[i].body1_type == GROUND) { // GROUND VERSION
             cID = Contacts[i].contact_ID;  
             r2 = Contacts[i].r2; 
             body2id = spheres[Contacts[i].body2].bodyIndex(); 
