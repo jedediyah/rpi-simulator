@@ -119,7 +119,7 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
     
     
     ////////////////////////////////////////////////////////////////
-    // SPHERE-MESH collision detection
+    // MESH-SPHERE collision detection
     
     
    

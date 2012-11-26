@@ -15,6 +15,8 @@
 #  include <GL/glut.h>
 #endif
 
+string d2s(double d);
+
 const char PATH_LICENSE[] = "2391033789&Courtesy_License&&&USR&2010&7_1_2010&1000&PATH&GEN&31_12_2010&0_0_0&0&0_0";
 
 Simulation::Simulation() {
@@ -25,6 +27,7 @@ Simulation::Simulation() {
     Num_Spheres = 0;
     num_contacts = 0;
     running = false; 
+    ActiveBody_Type = -1; 
 }
 
 Simulation::Simulation(const Simulation& orig) {
@@ -232,13 +235,18 @@ bool Simulation::isRunning() { return running; }
 void Simulation::step() {  // dt is now step_size...
     
     // Collision detection 
+    tic();
     CD.findCollisions(Contacts, Num_Bodies, num_contacts, num_subcontacts, Sphere_Bodies, Num_Spheres); 
+    timer_collision_detection = toc();
     
+    tic();
     vec z;  // Will hold the result of the dynamics 
     //cdaDynamics(Contacts, Sphere_Bodies, Trimesh_Bodies, Num_Bodies, num_contacts, num_subcontacts );
     z = lcpDynamics(Contacts, Sphere_Bodies, Num_Spheres, Trimesh_Bodies, Num_Trimeshes,
                 Num_Bodies, num_contacts, step_size );
+    timer_dynamics = toc(); 
     
+    tic();
     // Kinematic update: update each object's NU, then step. 
     for (int i=0; i<Num_Trimeshes; i++) { 
         Trimesh_Bodies[i].stepDynamics(step_size);
@@ -263,13 +271,117 @@ void Simulation::step() {  // dt is now step_size...
             }
         }
     }
+    timer_kinematic_update = toc();
     
+    tic();
     draw(false);
+    timer_graphics = toc();
     
 //    while (running) {
 //        cout << " Sim, running... " << endl; 
 //    }
     
+}
+
+char* Simulation::text_activeBodyName() {
+    string outputString;
+    if (ActiveBody_Type == SPHERE) {
+        outputString = "Name: " + Sphere_Bodies[ActiveBody_Index].name();
+    }
+    else if (ActiveBody_Type == TRIMESH) {
+        outputString = "Name: " + Trimesh_Bodies[ActiveBody_Index].name();
+    }
+    return (char*)outputString.c_str(); 
+}
+char* Simulation::text_activeBodyPosition() {
+    string outputString;
+    if (ActiveBody_Type == SPHERE) {
+        outputString = "Position: (" + 
+                d2s(Sphere_Bodies[ActiveBody_Index].u()[0]) + ", " + 
+                d2s(Sphere_Bodies[ActiveBody_Index].u()[1]) + ", " + 
+                d2s(Sphere_Bodies[ActiveBody_Index].u()[2]) + ")"; 
+    }
+    else if (ActiveBody_Type == TRIMESH) {
+         outputString = "Position: (" + 
+                d2s(Trimesh_Bodies[ActiveBody_Index].u()[0]) + ", " + 
+                d2s(Trimesh_Bodies[ActiveBody_Index].u()[1]) + ", " + 
+                d2s(Trimesh_Bodies[ActiveBody_Index].u()[2]) + ")"; 
+    }
+    return (char*)outputString.c_str(); 
+}
+char* Simulation::text_activeBodyRotation() {
+    string outputString;
+    if (ActiveBody_Type == SPHERE) {
+        outputString = "Quaternion: (\n\t" + 
+                d2s(Sphere_Bodies[ActiveBody_Index].quat()[0]) + ", " +
+                d2s(Sphere_Bodies[ActiveBody_Index].quat()[0]) + ", " + 
+                d2s(Sphere_Bodies[ActiveBody_Index].quat()[1]) + ", " + 
+                d2s(Sphere_Bodies[ActiveBody_Index].quat()[2]) + ")"; 
+    }
+    else if (ActiveBody_Type == TRIMESH) {
+         outputString = "Quaternion: (" + 
+                d2s(Trimesh_Bodies[ActiveBody_Index].quat()[0]) + ", " + 
+                d2s(Trimesh_Bodies[ActiveBody_Index].quat()[0]) + ", " +
+                d2s(Trimesh_Bodies[ActiveBody_Index].quat()[1]) + ", " + 
+                d2s(Trimesh_Bodies[ActiveBody_Index].quat()[2]) + ")"; 
+    }
+    return (char*)outputString.c_str();     
+}
+
+// tic and toc: behavior similar to MATLAB's
+void Simulation::tic() {
+    TIME = clock(); 
+}
+double Simulation::toc() {
+    return (clock() - TIME) / (double) CLOCKS_PER_SEC;  
+} 
+
+char* Simulation::Time_collision_detection() {
+    string outputString = "";  
+    std::stringstream ss;
+    ss << timer_dynamics; 
+    outputString = ss.str(); 
+    outputString = "Dynamics time: " + outputString;  
+    return (char*) outputString.c_str();  
+}
+char* Simulation::Time_dynamics() {
+    string outputString = "";  
+    std::stringstream ss;
+    ss << timer_collision_detection; 
+    outputString = ss.str(); 
+    outputString = "Collision detection time: " + outputString;  
+    return (char*) outputString.c_str();  
+}
+char* Simulation::Time_graphics() {
+    string outputString = "";  
+    std::stringstream ss;
+    ss << timer_graphics; 
+    outputString = ss.str(); 
+    outputString = "Graphics time: " + outputString;  
+    return (char*) outputString.c_str();  
+}
+char* Simulation::Time_kinematic_update() {
+    string outputString = "";  
+    std::stringstream ss;
+    ss << timer_kinematic_update; 
+    outputString = ss.str(); 
+    outputString = "Kinematic update time: " + outputString;  
+    return (char*) outputString.c_str();
+}
+char* Simulation::Solver_iterations() {
+    string outputString = "";  
+    std::stringstream ss;
+    ss << 0.0;          // TODO get iterations
+    outputString = ss.str(); 
+    outputString = "Solver iterations: " + outputString;  
+    return (char*) outputString.c_str();     
+}
+
+
+string d2s(double d) {
+    std::stringstream ss;
+    ss << d;
+    return ss.str();
 }
 
 
