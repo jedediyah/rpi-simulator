@@ -229,6 +229,10 @@ void Body_trimesh::updateWorld_Verts() {
 
 }
 
+int Body_trimesh::num_verts() { return Num_Verts; }
+int Body_trimesh::num_edges() { return Num_Edges; }
+int Body_trimesh::num_faces() { return Num_Faces; }
+
 void Body_trimesh::setVertices(double v[], int num_v) {
     Num_Verts = num_v; 
     Local_Verts = new double[3*num_v];     // Allocate memory for vertices
@@ -249,9 +253,9 @@ void Body_trimesh::printVertices() {
 }
 
 // Return a pointer to the vertices of the trimesh 
-double* Body_trimesh::verts() { 
-    return Local_Verts;  
-}
+double* Body_trimesh::local_verts() { return Local_Verts; }
+double* Body_trimesh::world_verts() { return World_Verts; }
+
 
 void Body_trimesh::initializeGL(){
     // Make sure world coordinates are initialized 

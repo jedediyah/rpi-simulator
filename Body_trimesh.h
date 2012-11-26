@@ -32,6 +32,11 @@ public:
     void scale(double s); 
     void updateWorld_Verts(); 
     
+    // Gets
+    int num_verts();
+    int num_edges();
+    int num_faces();
+    
     // Graphics methods
     void initializeGL(); 
     void draw(); // OpenGL draw method
@@ -39,7 +44,8 @@ public:
     
     void setVertices(double v[], int num_v); 
     void printVertices(); 
-    double* verts();  
+    double* local_verts();  
+    double* world_verts();
     
     void printAllData(); 
     

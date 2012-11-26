@@ -12,6 +12,8 @@ using namespace arma;
 Contact::Contact () { 
 }
 Contact::Contact(   int contact_ID,
+                    int body1_type,
+                    int body2_type,
                     int body1,
                     int body2,
                     mat normal,
@@ -22,6 +24,8 @@ Contact::Contact(   int contact_ID,
                     char *collision_type ) {
         
     this->contact_ID = contact_ID;
+    this->body1_type = body1_type;
+    this->body2_type = body2_type; 
     this->body1 = body1;
     this->body2 = body2;
     this->normal = normal; 
@@ -33,6 +37,8 @@ Contact::Contact(   int contact_ID,
 }
 
 Contact::Contact(   int contact_ID,
+                    int body1_type,
+                    int body2_type,
                     int body1,
                     int body2,
                     mat normal,
@@ -42,6 +48,8 @@ Contact::Contact(   int contact_ID,
                     mat psi ) {
         
     this->contact_ID = contact_ID;
+    this->body1_type = body1_type;
+    this->body2_type = body2_type; 
     this->body1 = body1;
     this->body2 = body2;
     this->normal = normal; 

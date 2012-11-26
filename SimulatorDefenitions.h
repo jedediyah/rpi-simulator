@@ -9,7 +9,8 @@
 #define	SIMULATORDEFENITIONS_H
 
 
-#define TRIMESH 0       // For differentiating between object arrays 
+#define GROUND -1
+#define TRIMESH 0   // For differentiating between object arrays 
 #define SPHERE 1
 
 

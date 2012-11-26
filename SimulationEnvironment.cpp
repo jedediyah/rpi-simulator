@@ -73,7 +73,7 @@ double CamZrot;
 double camRXp, camRYp; 
 double camXi, camYi;
 double camZoomFactor = 1.0;     // Change of 10% every zoom
-double objMoveFactor = 40.0;    // Smaller -> faster reaction when moving object
+double objMoveFactor = 58.0;    // Smaller -> faster reaction when moving object
 
 // Mouse translation 
 vec CamLook;
@@ -410,7 +410,6 @@ void draw_PANEL_main() {
     glViewport(LeftPanelWidth,0,width-LeftPanelWidth,height);
     glScissor(LeftPanelWidth,0,width-LeftPanelWidth,height);
     glClearColor(0.2235f, 0.2235f, 0.2235f, 1.0f);   // Blender color
-    //glClearColor(0.2529f, 0.2529f, 0.2529f, 0.f);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clear
     
     // Wire-frame or not
