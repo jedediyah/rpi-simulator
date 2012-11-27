@@ -25,7 +25,7 @@ public:
     void initializeGL(); 
     void draw(bool wireframe); // OpenGL draw method
     
-private:
+protected:
     // Sphere properties distinct from generic Body_object
     double Radius;  
 

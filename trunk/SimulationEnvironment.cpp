@@ -49,8 +49,7 @@ static bool wireframe = false;
 static double gridColor[] = {0.5, 0.5, 0.5};
 static long font_left_panel = (long)GLUT_BITMAP_HELVETICA_10; // Font selection. 
 static long font_simInfo = (long)GLUT_BITMAP_HELVETICA_10;
-//static int activeBody_type;            // The active body type e.g. sphere, mesh, etc.
-//static int activeBody_index=-1; 
+static bool drawSimInfo = true;
 
 vec::fixed<3> Camera;
 vec::fixed<3> CameraPrev; 
@@ -413,8 +412,10 @@ void draw_PANEL_main() {
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Clear
     
     // Wire-frame or not
-    if (wireframe)
+    if (wireframe) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDisable(GL_CULL_FACE);
+    }
     else
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -494,7 +495,8 @@ void draw_PANEL_simInfo() {
 void drawScene(void)
 {  
     draw_PANEL_main();
-    draw_PANEL_simInfo();
+    if (drawSimInfo)
+        draw_PANEL_simInfo();
     draw_PANEL_left();
     
     glutSwapBuffers();
@@ -549,6 +551,15 @@ void keyInput(unsigned char key, int x, int y)
                    drawScene();
                }
            }
+           break;
+           
+       case 99: // c    toggle drawcontacts
+           SIM.toggleDrawContacts();
+           drawScene(); 
+           break;
+           
+       case 105: // i   toggle draw simulation information
+           drawSimInfo = !drawSimInfo; 
            break;
            
        case 112: // p

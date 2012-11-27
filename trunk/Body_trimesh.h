@@ -49,7 +49,7 @@ public:
     
     void printAllData(); 
     
-private:
+protected:
     int Num_Verts;
     int Num_Edges; 
     int Num_Faces;

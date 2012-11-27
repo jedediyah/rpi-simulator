@@ -14,7 +14,7 @@
 
 // functions
 vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres, 
-                 Body_trimesh *trimeshes, int &num_trimeshes, int &nb, int &nc); 
+                 Body_trimesh *meshes, int &num_meshes, int &nb, int &nc); 
 mat rot(vec k, double theta); 
 mat hat(vec k); 
 
@@ -22,7 +22,7 @@ mat hat(vec k);
 /////////////////////////////////////
 // lcpDynamics 
 vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres, 
-                 Body_trimesh *trimeshes, int &num_trimeshes, 
+                 Body_trimesh *meshes, int &num_meshes, 
                  int &nb, int &nc, double &h) {
     
     int nd = 7;  // Number of friction directions in discretized friction cone
@@ -51,7 +51,13 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
             M.submat(span(6*bid-6,6*bid-1),span(6*bid-6,6*bid-1)) = spheres[s].mass_inertia_matrix();
         }
     }
-    // TODO: trimeshes
+    // MESHES
+    for (int m=0; m<num_meshes; m++) {
+        if ( meshes[m].ContactCount > 0 ) { // If sphere has active contacts
+            bid = meshes[m].bodyIndex(); 
+            M.submat(span(6*bid-6,6*bid-1),span(6*bid-6,6*bid-1)) = meshes[m].mass_inertia_matrix();
+        }
+    }
     
     // E
     if (nd > 0)
@@ -68,13 +74,20 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
     for (int i=0; i<nc; i++) {
         
         if (Contacts[i].body1_type == GROUND) { // GROUND VERSION
+            
+            Body_object body2; 
+            if (Contacts[i].body2_type == SPHERE) 
+                body2 = spheres[Contacts[i].body2];
+            else if (Contacts[i].body2_type == TRIMESH)
+                body2 = meshes[Contacts[i].body2];
+            
             cID = Contacts[i].contact_ID;  
             r2 = Contacts[i].r2; 
-            body2id = spheres[Contacts[i].body2].bodyIndex(); 
+            body2id = body2.bodyIndex(); 
 
             // Gn
             Gn_i2 = join_cols(Contacts[i].normal, cross(r2, Contacts[i].normal));
-            if ( !spheres[Contacts[i].body2].isStaticBody() )
+            if ( !body2.isStaticBody() )
                 Gn.submat( span(6*body2id-6,6*body2id-1),span(cID,cID) ) = Gn_i2; 
 
             // Gf
@@ -84,23 +97,24 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
                     d = rot(Contacts[i].normal, ((j)/(double)nd)*(2.*M_PI)) * Contacts[i].tangent; 
                     Gf_i2.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r2,d));
                 }
-                if ( !spheres[Contacts[i].body2].isStaticBody() )
+                if ( !body2.isStaticBody() )
                     Gf.submat( span(6*body2id-6,6*body2id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i2; 
             }
 
             // With the MCP, this is where we would fill in a portion of b.  
             // The following will make redundant assignments to NU & FX, but it's 
             // for the best right now!  (Since we need PSI, and we're already looping)
-            if ( !spheres[Contacts[i].body2].isStaticBody() ) {
-                NU.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = spheres[Contacts[i].body2].nu(); 
-                FX.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = spheres[Contacts[i].body2].fext();
+            if ( !body2.isStaticBody() ) {
+                NU.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = body2.nu(); 
+                FX.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = body2.fext();
             }
 
             // U
-            U.at(cID,cID) = 0.5 * (0.5 * spheres[Contacts[i].body2].mu());
+            U.at(cID,cID) = 0.5 * (0.5 * body2.mu());
             PSI.at(cID) = Contacts[i].psi.at(0);
         }
         
+        // Ground not involved 
         else {
             cID = Contacts[i].contact_ID;  
             r1 = Contacts[i].r1;

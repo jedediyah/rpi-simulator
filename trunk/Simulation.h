@@ -71,6 +71,8 @@ public:
     char* Time_kinematic_update();
     char* Time_graphics();
     char* Solver_iterations();  
+    
+    void toggleDrawContacts();
 
 private:
     
@@ -102,6 +104,8 @@ private:
     double timer_dynamics; 
     double timer_kinematic_update; 
     double timer_graphics;
+    
+    bool drawContacts; 
     
 
 };
