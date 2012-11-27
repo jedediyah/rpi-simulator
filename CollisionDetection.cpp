@@ -63,6 +63,8 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
         if (!spheres[s].isStaticBody()) {
             mat psi = zeros(1);
             psi.at(0) = spheres[s].u().at(2) - spheres[s].radius(); // psi=height-radius
+            if (psi[0] > 0.5)
+                continue; 
             mat n = zeros(3, 1);
             n.at(2) = 1.0; // Normal to sphere is always up (+z direction)
             
@@ -85,17 +87,23 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
     // MESH-GROUND collision detection
     for (int b=0; b<num_meshes; b++) {
         if (!meshes[b].isStaticBody()) {
-            for (int v=0; v<meshes[b].num_verts(); v++) {  // For every vertex
+            for (int v=0; v<meshes[b].num_verts(); v++) {  // For every vertex 
                 
                 mat psi = zeros(1);
                 psi[0] = meshes[b].world_verts()[3*v+2];  // psi=z value
+                if (psi[0] > 0.5)  // TODO: this is a hardcoded epsilon 
+                    continue; 
                 mat n = zeros(3, 1);
                 n.at(2) = 1.0; // Normal to sphere is always up (+z direction)
 
                 mat t = arbitraryTangent(n);
                 vec r1 = n;    // Won't be used... since ground is static.
-                mat r2 = meshes[b].world_verts()[3*v+2] - meshes[b].u(); 
-                Contact c = Contact(cID++,GROUND,TRIMESH, -3, b, n, t, r1, r2, psi);   // -3 is our special int for GROUND
+                vec p2 = zeros(3,1);
+                p2[0] = meshes[b].world_verts()[3*v+0];
+                p2[1] = meshes[b].world_verts()[3*v+1];
+                p2[2] = meshes[b].world_verts()[3*v+2];
+                mat r2 = p2 - meshes[b].u(); 
+                Contact c = Contact(cID++,GROUND,TRIMESH, -3, b, n, t, r1, r2, psi);   // -3 is arbitrary
                 Contacts[num_contacts++] = c;
 
                 meshes[b].ContactCount++; // Already made sure not static 

@@ -22,8 +22,8 @@ Body_object::Body_object() {
     U = zeros<vec>(3); 
     Quat = zeros<vec>(4); Quat(0) = 1.0; 
     Nu = zeros<vec>(6);
-    Fext = zeros<vec>(6);                Fext.at(2) = -9.8; // Fake gravity!!!
     Aext = zeros<vec>(6); 
+    Fext = zeros<vec>(6);                setFext(0,0,-9.8,0,0,0); // Gravity
     Mu = 0.5; 
     IsStaticBody = 0; 
     Visible = true; 
@@ -81,7 +81,7 @@ void Body_object::setVelocity(double x, double y, double z, double wx, double wy
 }
 void Body_object::setFext(double Fx, double Fy, double Fz, double Tx, double Ty, double Tz) {
     Fext(0)=Fx; Fext(1)=Fy; Fext(2)=Fz; Fext(3)=Tx; Fext(4)=Ty; Fext(5)=Tz; 
-    Aext = Fext/Mass; 
+    Aext = Fext/Mass;
 }
 void Body_object::setAext(double Ax, double Ay, double Az, double ax, double ay, double az) {
     Aext(0)=Ax; Aext(1)=Ay; Aext(2)=Az; Aext(3)=ax; Aext(4)=ay; Aext(5)=az;
@@ -121,7 +121,7 @@ void Body_object::stepDynamics(double dt) {
 
 // Updates Nu only, based on current external accelerations. 
 void Body_object::applyAext(double dt) {
-    Nu = Nu*dt + 0.5 * Aext * dt*dt;  
+    Nu = Nu + Aext*dt;  
 }
 
 void Body_object::print() {

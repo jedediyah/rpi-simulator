@@ -28,6 +28,7 @@ Simulation::Simulation() {
     num_contacts = 0;
     running = false; 
     ActiveBody_Type = -1; 
+    drawContacts = false;        // TODO: Init as false, and toggle on 'c' 
 }
 
 Simulation::Simulation(const Simulation& orig) {
@@ -111,6 +112,38 @@ void Simulation::draw(bool wireframe) {
     for (int i=0; i<Num_Spheres; i++) {   // Draw all Spheres
         Sphere_Bodies[i].draw(wireframe);
     }
+   
+    
+    // Draw contacts
+   if (drawContacts) {
+    for (int c=0; c<num_contacts; c++) {
+        vec::fixed<3> p1, p2;
+
+        // p2
+        if (Contacts[c].body2_type == SPHERE)
+            p2 = Sphere_Bodies[Contacts[c].body2].u() + Contacts[c].r2;
+        else if (Contacts[c].body2_type == TRIMESH)
+            p2 = Trimesh_Bodies[Contacts[c].body2].u() + Contacts[c].r2;
+
+        // p1
+        if (Contacts[c].body1_type == SPHERE)
+            p1 = Sphere_Bodies[Contacts[c].body1].u() + Contacts[c].r1;
+        else if (Contacts[c].body1_type == TRIMESH)
+            p1 = Trimesh_Bodies[Contacts[c].body1].u() + Contacts[c].r1;
+        else if (Contacts[c].body1_type == GROUND) {
+            p1 = p2;       // If ground, then same as p2
+            p1[2] = 0.0;   // but with z value of zero
+        }
+
+        // Draw contact line
+        glDisable(GL_LIGHTING);
+        glColor3f(1.,1.,1.);
+        glBegin(GL_LINES);
+         glVertex3f(p1[0],p1[1],p1[2]);
+         glVertex3f(p2[0],p2[1],p2[2]);
+        glEnd();
+    }
+   }
 
 }
 
@@ -250,13 +283,14 @@ void Simulation::step() {  // dt is now step_size...
     
     tic();
     // Kinematic update: update each object's NU, then step. 
-    for (int i=0; i<Num_Trimeshes; i++) { 
-        Trimesh_Bodies[i].stepDynamics(step_size);
-        Trimesh_Bodies[i].updateWorld_Verts();  
-    }
+//    for (int i=0; i<Num_Trimeshes; i++) { 
+//        Trimesh_Bodies[i].stepDynamics(step_size);
+//        Trimesh_Bodies[i].updateWorld_Verts();  
+//    }
     
     int bID; 
-    for (int i=0; i<Num_Spheres; i++) {   // Draw all Spheres
+    // Spheres
+    for (int i=0; i<Num_Spheres; i++) {   
         if ( !Sphere_Bodies[i].isStaticBody() ) {
             if ( Sphere_Bodies[i].ContactCount > 0 ) { // If !static, and had contact
                 bID = Sphere_Bodies[i].BodyIndex;  
@@ -269,8 +303,29 @@ void Simulation::step() {  // dt is now step_size...
                 Sphere_Bodies[i].stepDynamics(step_size);
             } 
             else {
+                Sphere_Bodies[i].applyAext(step_size); 
                 Sphere_Bodies[i].stepDynamics(step_size);
             }
+        }
+    }
+    // Meshes
+    for (int i=0; i<Num_Trimeshes; i++) {   
+        if ( !Trimesh_Bodies[i].isStaticBody() ) {
+            if ( Trimesh_Bodies[i].ContactCount > 0 ) { // If !static, and had contact
+                bID = Trimesh_Bodies[i].BodyIndex;  
+                Trimesh_Bodies[i].setVelocity( z.at(6*bID-6), 
+                                              z.at(6*bID-5),
+                                              z.at(6*bID-4),
+                                              z.at(6*bID-3),
+                                              z.at(6*bID-2),
+                                              z.at(6*bID-1));  
+                Trimesh_Bodies[i].stepDynamics(step_size);
+            } 
+            else {
+                Trimesh_Bodies[i].applyAext(step_size); 
+                Trimesh_Bodies[i].stepDynamics(step_size);
+            }
+            Trimesh_Bodies[i].updateWorld_Verts();  // Annoying to forget
         }
     }
     timer_kinematic_update = toc();
@@ -379,7 +434,9 @@ char* Simulation::Solver_iterations() {
     return (char*) outputString.c_str();     
 }
 
+void Simulation::toggleDrawContacts() { drawContacts = !drawContacts; }
 
+// Convert a double to a string
 string d2s(double d) {
     std::stringstream ss;
     ss << d;
