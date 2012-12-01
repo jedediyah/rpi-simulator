@@ -28,6 +28,7 @@ Body_object::Body_object() {
     IsStaticBody = 0; 
     Visible = true; 
     Bounding_Radius = 1.0; 
+    Color[0] = 1.0; 
     
     // Contact variables
     BodyIndex = -1;   // For indexing in the dynamics formulation 
@@ -55,8 +56,9 @@ vec Body_object::fext()                  { return Fext; }
 vec Body_object::aext()                  { return Aext; }
 double Body_object::mu()                 {return Mu; }
 bool Body_object::isStaticBody()         { return IsStaticBody; }
-bool Body_object::visible()              { return Visible; }
+bool Body_object::isVisible()            { return Visible; }
 double Body_object::bounding_radius()    { return Bounding_Radius; }
+vec Body_object::color()                 { return Color; } 
 int Body_object::bodyIndex()             { return BodyIndex; }
 int Body_object::contactCount()          { return ContactCount; }
 
@@ -91,6 +93,7 @@ void Body_object::setMu(double mu) { Mu = mu; }
 void Body_object::setStatic(bool isStatic) { IsStaticBody = isStatic; }
 void Body_object::setVisible(bool visible) { Visible = visible; }
 void Body_object::setBoundingRadius(double r) { Bounding_Radius = r; }
+void Body_object::setColor(vec c) { Color = c; }
 
 // Uses current velocities to update position vector U and quaternion Quat. 
 void Body_object::stepDynamics(double dt) {

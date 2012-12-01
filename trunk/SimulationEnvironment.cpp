@@ -51,37 +51,37 @@ static long font_left_panel = (long)GLUT_BITMAP_HELVETICA_10; // Font selection.
 static long font_simInfo = (long)GLUT_BITMAP_HELVETICA_10;
 static bool drawSimInfo = true;
 
-vec::fixed<3> Camera;
-vec::fixed<3> CameraPrev; 
-vec::fixed<3> CamLookAt = zeros(3); 
-vec::fixed<3> CamLookAtPrev = zeros(3); 
-vec::fixed<3> X = zeros(3);
-vec::fixed<3> Y = zeros(3); 
-vec::fixed<3> Z = zeros(3); 
-double dx;
-double dz; 
+static vec::fixed<3> Camera;
+static vec::fixed<3> CameraPrev; 
+static vec::fixed<3> CamLookAt = zeros(3); 
+static vec::fixed<3> CamLookAtPrev = zeros(3); 
+static vec::fixed<3> X = zeros(3);
+static vec::fixed<3> Y = zeros(3); 
+static vec::fixed<3> Z = zeros(3); 
+static double dx;
+static double dz; 
 
 // Mouse rotation and zoom 
-bool   enableMouseRotation = false; 
-bool   enableMouseTranslation = false; 
-bool   enableObjectMove = false; 
-double rotScale = 0.01;         // How quickly mouse rotates view
-double CamInit[3];
-double CamXrot;
-double CamZrot; 
-double camRXp, camRYp; 
-double camXi, camYi;
-double camZoomFactor = 1.0;     // Change of 10% every zoom
-double objMoveFactor = 58.0;    // Smaller -> faster reaction when moving object
+static bool   enableMouseRotation = false; 
+static bool   enableMouseTranslation = false; 
+static bool   enableObjectMove = false; 
+static double rotScale = 0.01;         // How quickly mouse rotates view
+static double CamInit[3];
+static double CamXrot;
+static double CamZrot; 
+static double camRXp, camRYp; 
+static double camXi, camYi;
+static double camZoomFactor = 1.0;     // Change of 10% every zoom
+static double objMoveFactor = 58.0;    // Smaller -> faster reaction when moving object
 
 // Mouse translation 
-vec CamLook;
-vec CamRight;
-vec CamUp;
+static vec CamLook;
+static vec CamRight;
+static vec CamUp;
 
 // Mouse move object
-int moveState = 0; 
-vec obj_Ui;  // Initial position  
+static int moveState = 0; 
+static vec obj_Ui;  // Initial position  
 
 // STATIC methods
 void makeMenu(void);
@@ -195,6 +195,7 @@ void initializeGL(int argc, char **argv)
     glutInitWindowSize(width, height);
     glutInitWindowPosition(300, 100); 
     glutCreateWindow("RPI - Simulator");
+    //glutSetIconTitle("I");
     glutDisplayFunc(drawScene); 
     glutReshapeFunc(resize);  
     glutKeyboardFunc(keyInput);                     // Keyboard input
@@ -306,7 +307,7 @@ void drawGrid() {
 // Routine to draw a bitmap character string.
 void writeBitmapString(void *font, char *string) {  
    char *c;
-   for (c = string; *c != '\0'; c++) glutBitmapCharacter(font, *c);
+   for (c = string; *c != NULL; c++) glutBitmapCharacter(font, *c);
 }
 
 void worldLighting() {
@@ -351,14 +352,14 @@ void worldLighting() {
     glCullFace(GL_BACK);
     
     // Draw sphere at light
-    glDisable(GL_LIGHTING);
-    glPushMatrix();
-        glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
-        glTranslatef(lightPos0[0], lightPos0[1], lightPos0[2]);
-        glColor3f(0.0, 1.0, 0.0); 
-        glutWireSphere(0.05, 8, 8);
-    glPopMatrix();
-    glEnable(GL_LIGHTING);
+//    glDisable(GL_LIGHTING);
+//    glPushMatrix();
+//        glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
+//        glTranslatef(lightPos0[0], lightPos0[1], lightPos0[2]);
+//        glColor3f(0.0, 1.0, 0.0); 
+//        glutWireSphere(0.05, 8, 8);
+//    glPopMatrix();
+//    glEnable(GL_LIGHTING);
 }
 
 // Draw the panel on the left
@@ -390,6 +391,11 @@ void draw_PANEL_left() {
         // Body name
         glRasterPos3f(-LeftPanelWidth/2.0 + edge_buffer,height/2.0+d,0.0); 
         writeBitmapString((void*)font_left_panel, SIM.text_activeBodyName());
+        d-=os; 
+        
+        // Static body status
+        glRasterPos3f(-LeftPanelWidth/2.0 + edge_buffer,height/2.0+d,0.0); 
+        writeBitmapString((void*)font_left_panel, SIM.text_activeBodyIsStatic());
         d-=os; 
 
         // Position 
@@ -436,7 +442,7 @@ void draw_PANEL_main() {
         // Draw sphere at CamLookAt
 //        glPushMatrix();
 //        glTranslatef(CamLookAt[0],CamLookAt[1],CamLookAt[2]);
-//        glutWireSphere(.1,5,5);
+//        glutWireSphere(.1,20,20);
 //        glPopMatrix();
 
     worldLighting();            // Lighting
@@ -472,7 +478,7 @@ void draw_PANEL_simInfo() {
     
     glRasterPos3f(-InfoPanelWidth/2.0 + edge_buffer, InfoPanelHeight/2.0+d, 0.0); 
     writeBitmapString( (void*)font_simInfo, SIM.Time_dynamics() );
-    d-=os;;
+    d-=os; 
     
     glRasterPos3f(-InfoPanelWidth/2.0 + edge_buffer, InfoPanelHeight/2.0+d, 0.0); 
     writeBitmapString( (void*)font_simInfo, SIM.Time_collision_detection() );
@@ -560,6 +566,7 @@ void keyInput(unsigned char key, int x, int y)
            
        case 105: // i   toggle draw simulation information
            drawSimInfo = !drawSimInfo; 
+           drawScene(); 
            break;
            
        case 112: // p
@@ -572,6 +579,7 @@ void keyInput(unsigned char key, int x, int y)
            break;
            
        case 103: // g   Move the active object
+           if (SIM.activeBody_type() < 0) break;  // If there are no bodies, do nothing.
            obj_Ui = SIM.activeBodyPosition(); 
            camXi = x;
            camYi = y;
@@ -580,18 +588,36 @@ void keyInput(unsigned char key, int x, int y)
            mousePassiveMoveEvent(x, y);
            break;
            
+       case 113: // q   quit
+           exit(0);
+           break; 
+           
+       case 115: // s   toggle active body static 
+           if (SIM.activeBody_type() < 0) break;  // If there are no bodies, do nothing.
+           SIM.toggleActiveBodyStatic(); 
+           drawScene();  
+           break;
+           
+       case 118: // v   toggle active body visible
+           if (SIM.activeBody_type() < 0) break;  // If there are no bodies, do nothing.
+           SIM.toggleActiveBodyVisible(); 
+           drawScene();
+           break;
+
        case 120: // x   Move object on x axis
            if (enableObjectMove) {
                moveState = objMOVE_X;           
                mousePassiveMoveEvent(x, y);
            }
            break;
+           
        case 121: // y   Move object on y axis
            if (enableObjectMove) {
                 moveState = objMOVE_Y;           
                 mousePassiveMoveEvent(x, y);
            }
            break;
+           
        case 122: // z   Move object on z axis 
            if (enableObjectMove) {
                moveState = objMOVE_Z;
@@ -599,10 +625,6 @@ void keyInput(unsigned char key, int x, int y)
            }
            break; 
            
-       case 113: // q   quit
-           exit(0);
-           break; 
-
        case 27: // [ESC]   Cancels whatever action is being done
            if(enableObjectMove) {
                enableObjectMove =! enableObjectMove; 

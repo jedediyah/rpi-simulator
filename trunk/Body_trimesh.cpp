@@ -274,6 +274,7 @@ void Body_trimesh::initializeGL(){
 }
 
 void Body_trimesh::draw() {
+    if ( !this->Visible ) return;  
     
     // TODO: Take care of color
     
@@ -302,6 +303,15 @@ void Body_trimesh::draw() {
 //                glVertex3f(-5.0,15.0,0.0);
 //               glEnd();
  
+    // Material property vectors.
+    float matAmbAndDif1[] = {Color[0], Color[1], Color[2], 1.0};
+    float matSpec[] = {1.0, 1.0, 1.0, 1.0};
+    float matShine[] = {50.0};
+    // Material properties 
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpec);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShine);
+    
     // Don't need to transform since we have the world coordinates.
     // Draw each face
     int vdex;
