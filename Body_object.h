@@ -33,8 +33,9 @@ public:
     vec aext (); 
     double mu ();               // Friction "factor"
     bool isStaticBody ();       // Static or dynamics body
-    bool visible();             // Whether to draw or not 
+    bool isVisible();             // Whether to draw or not 
     double bounding_radius();
+    vec color();
 
     // Set methods
     void setName(string Name);  // Set name
@@ -50,6 +51,7 @@ public:
     void setStatic(bool s); 
     void setVisible(bool visible);      // Set visibility 
     void setBoundingRadius(double r);
+    void setColor(vec c); 
     
     // Dynamics 
     void stepDynamics(double dt);
@@ -83,6 +85,7 @@ protected:
     double Mu;  // Friction "factor"
     bool IsStaticBody; // Dynamic or static body
     double Bounding_Radius; 
+    vec::fixed<3>   Color;  // Color of object
     
     // Graphics variables
     bool Visible;  

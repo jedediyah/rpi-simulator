@@ -95,12 +95,12 @@ void Simulation::draw(bool wireframe) {
 //    glMaterialfv(GL_FRONT, GL_SHININESS, matShine);
 //    glMaterialfv(GL_FRONT, GL_EMISSION, matEmission);
     
-       // Material property vectors.
+   // Material property vectors.
    float matAmbAndDif1[] = {0.9, 0.0, 0.0, 1.0};
    float matAmbAndDif2[] = {0.0, 0.9, 0.0, 1.0};
    float matSpec[] = {1.0, 1.0, 1.0, 1.0};
    float matShine[] = {50.0};
-      // Material properties 
+   // Material properties 
    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpec);
    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShine);
@@ -166,7 +166,15 @@ bool Simulation::addBody(Body_sphere &body) {
 // Add TRIMESH
 bool Simulation::addBody(Body_trimesh &body) {
     ActiveBody_Type = TRIMESH;
-    ActiveBody_Index = Num_Trimeshes; 
+    ActiveBody_Index = Num_Trimeshes;        
+    
+    vec color = zeros(3);
+    cout << (rand()%1000)/1000.0 << endl;
+    color[0] = (rand()%1000)/1000.0;
+    color[1] = (rand()%1000)/1000.0;
+    color[2] = (rand()%1000)/1000.0;
+    body.setColor(color);
+    
     Trimesh_Bodies[Num_Trimeshes++] = body; 
     TotalBodyCount++;
     return true;
@@ -369,7 +377,7 @@ char* Simulation::text_activeBodyPosition() {
 char* Simulation::text_activeBodyRotation() {
     string outputString;
     if (ActiveBody_Type == SPHERE) {
-        outputString = "Quaternion: (\n\t" + 
+        outputString = "Quaternion: (" + 
                 d2s(Sphere_Bodies[ActiveBody_Index].quat()[0]) + ", " +
                 d2s(Sphere_Bodies[ActiveBody_Index].quat()[1]) + ", " + 
                 d2s(Sphere_Bodies[ActiveBody_Index].quat()[2]) + ", " + 
@@ -383,6 +391,23 @@ char* Simulation::text_activeBodyRotation() {
                 d2s(Trimesh_Bodies[ActiveBody_Index].quat()[3]) + ")"; 
     }
     return (char*)outputString.c_str();     
+}
+char* Simulation::text_activeBodyIsStatic() {
+    string outputString;
+    bool isStatic;
+    if (ActiveBody_Type == SPHERE) {
+        outputString = "Static Body: ";
+        isStatic = Sphere_Bodies[ActiveBody_Index].isStaticBody();
+    }
+    else if (ActiveBody_Type == TRIMESH) {
+        outputString = "Static Body: ";
+        isStatic = Trimesh_Bodies[ActiveBody_Index].isStaticBody();
+    }
+    if (isStatic)
+        outputString += "TRUE";
+    else
+        outputString += "FALSE"; 
+    return (char*)outputString.c_str();   
 }
 
 // tic and toc: behavior similar to MATLAB's
@@ -435,6 +460,22 @@ char* Simulation::Solver_iterations() {
 }
 
 void Simulation::toggleDrawContacts() { drawContacts = !drawContacts; }
+void Simulation::toggleActiveBodyStatic() {
+    if (ActiveBody_Type == SPHERE) {
+        Sphere_Bodies[ActiveBody_Index].setStatic(!Sphere_Bodies[ActiveBody_Index].isStaticBody());
+    }
+    else if (ActiveBody_Type == TRIMESH) {
+        Trimesh_Bodies[ActiveBody_Index].setStatic(!Trimesh_Bodies[ActiveBody_Index].isStaticBody());
+    }
+}
+void Simulation::toggleActiveBodyVisible() {
+    if (ActiveBody_Type == SPHERE) {
+        Sphere_Bodies[ActiveBody_Index].setVisible(!Sphere_Bodies[ActiveBody_Index].isVisible());
+    }
+    else if (ActiveBody_Type == TRIMESH) {
+        Trimesh_Bodies[ActiveBody_Index].setVisible(!Trimesh_Bodies[ActiveBody_Index].isVisible());
+    }
+}
 
 // Convert a double to a string
 string d2s(double d) {

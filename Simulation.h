@@ -60,6 +60,7 @@ public:
     char* text_activeBodyName();  
     char* text_activeBodyPosition(); 
     char* text_activeBodyRotation();
+    char* text_activeBodyIsStatic();
     int activeBody_type();
     int activeBody_index(); 
     
@@ -73,6 +74,8 @@ public:
     char* Solver_iterations();  
     
     void toggleDrawContacts();
+    void toggleActiveBodyStatic();
+    void toggleActiveBodyVisible();
 
 private:
     

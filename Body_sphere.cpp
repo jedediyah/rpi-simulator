@@ -81,8 +81,18 @@ void Body_sphere::initializeGL(){
 
 // Draw()
 void Body_sphere::draw(bool wireframe) { 
+    if ( !this->Visible ) return;  
 
     glPushMatrix();
+    
+        // Material property vectors.
+        float matAmbAndDif1[] = {Color[0], Color[1], Color[2], 1.0};
+        float matSpec[] = {1.0, 1.0, 1.0, 1.0};
+        float matShine[] = {50.0};
+        // Material properties 
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, matAmbAndDif1);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpec);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShine);
     
         glTranslatef(Body_object::u().at(0), // Translation
             Body_object::u().at(1),
