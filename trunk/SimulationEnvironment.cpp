@@ -210,9 +210,28 @@ void initializeGL(int argc, char **argv)
     Camera[0]=CamInit[0];   Camera[1]=CamInit[1];   Camera[2]=CamInit[2]; 
     X[0] = 1.0;             Y[1] = 1.0;             Z[2] = 1.0;  // Unit vectors
     
+    
+                            Body_trimesh tet = Body_trimesh("meshes/tetrahedron.poly");
+                            tet.setPosition(0.,0.,1.);
+                            tet.setStatic(true);
+                            tet.updateWorld_Verts();
+                            SIM.addBody(tet); 
+                            
+                            Body_trimesh tet2 = Body_trimesh("meshes/tetrahedron.poly");
+                            tet2.setPosition(0.1,1.,0.);
+                            tet2.setStatic(true);
+                            tet2.updateWorld_Verts();
+                            SIM.addBody(tet2); 
+
+                            Body_sphere sph = Body_sphere();
+                            sph.setRadius(0.2);
+                            sph.setPosition(0,0.1,2);
+                            SIM.addBody(sph); 
+    
     updateLookVectors();    
     makeMenu(); 
     drawScene();
+    
 }
 
 // draws a 10x10 grid at Z=0, centered at the origin (x,y) = (0,0) 

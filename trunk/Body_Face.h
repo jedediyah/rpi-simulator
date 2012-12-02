@@ -17,8 +17,8 @@ public:
 
     int num_verts(); 
     int num_edges();
-    int* vert_indicies();
-    int* edge_indicies();
+    int* verts();
+    int* edges();
     
     void setVerts(int v[], int num_v); 
     

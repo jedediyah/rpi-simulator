@@ -256,6 +256,9 @@ void Body_trimesh::printVertices() {
 double* Body_trimesh::local_verts() { return Local_Verts; }
 double* Body_trimesh::world_verts() { return World_Verts; }
 
+Body_Vertex* Body_trimesh::verts() { return Verts; } 
+Body_Face* Body_trimesh::faces() { return Faces; }
+Body_Edge* Body_trimesh::edges() { return Edges; }
 
 void Body_trimesh::initializeGL(){
     // Make sure world coordinates are initialized 
@@ -264,9 +267,9 @@ void Body_trimesh::initializeGL(){
     // Copy edges into trianagleIndecies
     triangleIndecies = new unsigned char [3*Num_Faces];
     for (int f=0; f<Num_Faces; f++) {
-        triangleIndecies[3*f+0] = Faces[f].vert_indicies()[0];  // I think I confused faces with verts!!!
-        triangleIndecies[3*f+1] = Faces[f].vert_indicies()[1];
-        triangleIndecies[3*f+2] = Faces[f].vert_indicies()[2];
+        triangleIndecies[3*f+0] = Faces[f].verts()[0];  // I think I confused faces with verts!!!
+        triangleIndecies[3*f+1] = Faces[f].verts()[1];
+        triangleIndecies[3*f+2] = Faces[f].verts()[2];
     }
     // Point to world coordinates 
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -317,18 +320,18 @@ void Body_trimesh::draw() {
     int vdex;
     for (int f=0; f<Num_Faces; f++) {
         // Face normal
-        vdex = Faces[f].vert_indicies()[0]; 
+        vdex = Faces[f].verts()[0]; 
         vert0[0] = World_Verts[3*vdex+0];
         vert0[1] = World_Verts[3*vdex+1];
         vert0[2] = World_Verts[3*vdex+2];
         
-        vdex = Faces[f].vert_indicies()[1];
+        vdex = Faces[f].verts()[1];
         vert1[0] = World_Verts[3*vdex+0];
         vert1[1] = World_Verts[3*vdex+1];
         vert1[2] = World_Verts[3*vdex+2];
         edge0 = vert1-vert0;
         
-        vdex = Faces[f].vert_indicies()[2];
+        vdex = Faces[f].verts()[2];
         vert0[0] = World_Verts[3*vdex+0];
         vert0[1] = World_Verts[3*vdex+1];
         vert0[2] = World_Verts[3*vdex+2];
@@ -337,7 +340,7 @@ void Body_trimesh::draw() {
        glBegin(GL_POLYGON);
           glNormal3f(face_norm[0],face_norm[1],face_norm[2]);  // Normal for lighting 
           for (int v=0; v<Faces[f].num_verts(); v++) {
-            vdex = Faces[f].vert_indicies()[v]; 
+            vdex = Faces[f].verts()[v]; 
             double vx = World_Verts[ 3*vdex+0 ];
             double vy = World_Verts[ 3*vdex+1 ];
             double vz = World_Verts[ 3*vdex+2 ]; // Should ALWAYS be a tri-face
@@ -376,7 +379,7 @@ void Body_trimesh::printAllData() {
     cout << "  FACES:" << endl;
     int *face_verts; 
     for (int f=0; f < Num_Faces; f++) {
-        face_verts = Faces[f].vert_indicies(); 
+        face_verts = Faces[f].verts(); 
         cout << "  F" << f << ": " << endl; 
         for (int v=0; v<Faces[f].num_verts(); v++) {
             cout << face_verts[v] << ", "; 

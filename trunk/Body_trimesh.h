@@ -47,6 +47,10 @@ public:
     double* local_verts();  
     double* world_verts();
     
+    Body_Vertex* verts(); 
+    Body_Face* faces();
+    Body_Edge* edges(); 
+    
     void printAllData(); 
     
 protected:

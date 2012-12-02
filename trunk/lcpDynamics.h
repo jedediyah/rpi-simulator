@@ -119,16 +119,27 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
             cID = Contacts[i].contact_ID;  
             r1 = Contacts[i].r1;
             r2 = Contacts[i].r2; 
-            body1id = spheres[Contacts[i].body1].bodyIndex();
-            body2id = spheres[Contacts[i].body2].bodyIndex(); 
+            
+            Body_object body1, body2; 
+            if (Contacts[i].body1_type == SPHERE) 
+                body1 = spheres[Contacts[i].body1];
+            else if (Contacts[i].body1_type == TRIMESH)
+                body1 = meshes[Contacts[i].body1];
+            if (Contacts[i].body2_type == SPHERE) 
+                body2 = spheres[Contacts[i].body2];
+            else if (Contacts[i].body2_type == TRIMESH)
+                body2 = meshes[Contacts[i].body2];
+            
+            body1id = body1.bodyIndex();
+            body2id = body2.bodyIndex(); 
 
             // Gn
             Gn_i1 = join_cols(-Contacts[i].normal, cross(r1,-Contacts[i].normal));
             Gn_i2 = join_cols(Contacts[i].normal, cross(r2, Contacts[i].normal));
 
-            if ( !spheres[Contacts[i].body1].isStaticBody() )
+            if ( !body1.isStaticBody() )
                 Gn.submat( span(6*body1id-6,6*body1id-1),span(cID,cID) ) = Gn_i1; 
-            if ( !spheres[Contacts[i].body2].isStaticBody() )
+            if ( !body2.isStaticBody() )
                 Gn.submat( span(6*body2id-6,6*body2id-1),span(cID,cID) ) = Gn_i2; 
 
             // Gf
@@ -140,27 +151,27 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
                     Gf_i1.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r1,d));
                     Gf_i2.submat( span(0,5), span(j,j) ) = join_cols( d , cross(r2,d));
                 }
-                if ( !spheres[Contacts[i].body1].isStaticBody() )
+                if ( !body1.isStaticBody() )
                     Gf.submat( span(6*body1id-6,6*body1id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i1;  // Need to double check these indices 
-                if ( !spheres[Contacts[i].body2].isStaticBody() )
+                if ( !body2.isStaticBody() )
                     Gf.submat( span(6*body2id-6,6*body2id-1), span( nd*(cID+1)-nd, nd*(cID+1)-1 ) ) = Gf_i2; 
             }
 
             // With the MCP, this is where we would fill in a portion of b.  
             // The following will make redundant assignments to NU & FX, but it's 
             // for the best right now!  (Since we need PSI, and we're already looping)
-            if ( !spheres[Contacts[i].body1].isStaticBody() ) {
-                NU.submat( span(6*body1id-6,6*body1id-1), span(0,0) ) = spheres[Contacts[i].body1].nu(); 
-                FX.submat( span(6*body1id-6,6*body1id-1), span(0,0) ) = spheres[Contacts[i].body1].fext(); 
+            if ( !body1.isStaticBody() ) {
+                NU.submat( span(6*body1id-6,6*body1id-1), span(0,0) ) = body1.nu(); 
+                FX.submat( span(6*body1id-6,6*body1id-1), span(0,0) ) = body1.fext(); 
             }
 
-            if ( !spheres[Contacts[i].body2].isStaticBody() ) {
-                NU.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = spheres[Contacts[i].body2].nu(); 
-                FX.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = spheres[Contacts[i].body2].fext();
+            if ( !body2.isStaticBody() ) {
+                NU.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = body2.nu(); 
+                FX.submat( span(6*body2id-6,6*body2id-1), span(0,0) ) = body2.fext();
             }
 
             // U
-                 U.at(cID,cID) = 0.5 * (spheres[Contacts[i].body1].mu() * spheres[Contacts[i].body2].mu());
+                 U.at(cID,cID) = 0.5 * (body1.mu() * body2.mu());
             PSI.at(cID) = Contacts[i].psi.at(0);
         }
         
