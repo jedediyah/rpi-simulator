@@ -53,6 +53,7 @@ public:
     void setRun(bool r);
     bool isRunning();
     void step();
+    int  stepCounter();
     
     void setActiveBody(int body_type, int body_index);
     void setActiveBodyPosition(vec u);
@@ -83,6 +84,7 @@ private:
     
     bool running; 
     double step_size; 
+    int Step_Counter; 
     
     int TotalBodyCount;
     

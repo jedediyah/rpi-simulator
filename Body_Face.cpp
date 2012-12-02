@@ -25,8 +25,8 @@ Body_Face::~Body_Face() {
 
 int Body_Face::num_verts() { return Num_Verts; } 
 int Body_Face::num_edges() { return Num_Edges; }
-int* Body_Face::vert_indicies() { return Vert_Indicies; }
-int* Body_Face::edge_indicies() { return Edge_Indicies; }
+int* Body_Face::verts() { return Vert_Indicies; }
+int* Body_Face::edges() { return Edge_Indicies; }
 
 void Body_Face::setVerts(int v[], int num_v) {
     Num_Verts = num_v;

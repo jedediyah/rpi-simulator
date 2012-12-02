@@ -169,8 +169,7 @@ bool Simulation::addBody(Body_trimesh &body) {
     ActiveBody_Index = Num_Trimeshes;        
     
     vec color = zeros(3);
-    cout << (rand()%1000)/1000.0 << endl;
-    color[0] = (rand()%1000)/1000.0;
+    color[0] = (rand()%1000)/1000.0;    // Assign random color 
     color[1] = (rand()%1000)/1000.0;
     color[2] = (rand()%1000)/1000.0;
     body.setColor(color);
@@ -277,6 +276,7 @@ void Simulation::step() {  // dt is now step_size...
     
     // Collision detection 
     tic();
+    Step_Counter++; 
     CD.findCollisions(Contacts, Num_Bodies, num_contacts, num_subcontacts, 
                                 Sphere_Bodies, Num_Spheres, 
                                 Trimesh_Bodies, Num_Trimeshes); 
@@ -347,6 +347,8 @@ void Simulation::step() {  // dt is now step_size...
 //    }
     
 }
+
+int Simulation::stepCounter() { return Step_Counter; }
 
 char* Simulation::text_activeBodyName() {
     string outputString;

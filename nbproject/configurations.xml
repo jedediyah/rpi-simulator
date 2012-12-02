@@ -15,6 +15,7 @@
       <itemPath>Contact.h</itemPath>
       <itemPath>Simulation.h</itemPath>
       <itemPath>SimulationEnvironment.h</itemPath>
+      <itemPath>cd_pointTriangleDistance.h</itemPath>
       <itemPath>cdaDynamics.h</itemPath>
       <itemPath>lcpDynamics.h</itemPath>
       <itemPath>lcp_nsqp.h</itemPath>

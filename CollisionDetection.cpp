@@ -10,6 +10,7 @@
 #include <armadillo>
 #include <cmath>
 #include "SimulatorDefenitions.h"
+#include "cd_pointTriangleDistance.h"
 
 using namespace std;
 using namespace arma; 
@@ -157,11 +158,91 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
     
     ////////////////////////////////////////////////////////////////
     // MESH-SPHERE collision detection
-    
-    
-   
-    
-    
+    bool has_valid_contact; 
+    Body_trimesh B1; 
+    Body_sphere B2;
+    double ms_psi_n;  
+    mat psi_n = zeros(1,1);
+    vec ms_norm = zeros(3);
+    vec ms_p1 = zeros(3); 
+    mat n = zeros(3,1); 
+    mat Tri = zeros(3,3); 
+    double p1[3]; 
+    Body_Face f_j; 
+    double triDist;
+    for (int i=0; i<num_meshes; i++) {          // for every mesh
+
+        for (int j=0; j<num_spheres; j++) {     // for every sphere
+            B1 = meshes[i];
+            B2 = spheres[j];
+
+            has_valid_contact = false; 
+            ms_psi_n = 10e9;
+            ms_norm = zeros(3,1); 
+            ms_p1 = zeros(3,1); 
+            
+            for (int f=0; f<B1.num_faces(); f++) {                // For each face
+                
+                // Put triangle together 
+                f_j = B1.faces()[f];
+                Tri(0,0) = B1.world_verts()[3*(f_j.verts()[0])+0]; 
+                Tri(0,1) = B1.world_verts()[3*(f_j.verts()[0])+1]; 
+                Tri(0,2) = B1.world_verts()[3*(f_j.verts()[0])+2]; 
+                Tri(1,0) = B1.world_verts()[3*(f_j.verts()[1])+0]; 
+                Tri(1,1) = B1.world_verts()[3*(f_j.verts()[1])+1]; 
+                Tri(1,2) = B1.world_verts()[3*(f_j.verts()[1])+2]; 
+                Tri(2,0) = B1.world_verts()[3*(f_j.verts()[2])+0]; 
+                Tri(2,1) = B1.world_verts()[3*(f_j.verts()[2])+1]; 
+                Tri(2,2) = B1.world_verts()[3*(f_j.verts()[2])+2]; 
+
+                pointTriangleDistance(Tri, B2.u(), triDist, p1); 
+                
+                n(0) = B2.u()[0] - p1[0];
+                n(1) = B2.u()[1] - p1[1];
+                n(2) = B2.u()[2] - p1[2];
+                psi_n[0] = triDist - B2.radius();  
+                n = n/norm(n,2); 
+                
+                if ( psi_n[0] > -.1 && abs(psi_n[0]) < abs(ms_psi_n) && psi_n[0] < 0.4 ) {   // Epsilons hardcoded in
+                    has_valid_contact = true;
+                    ms_psi_n = psi_n[0];
+                    ms_norm = n;
+                    ms_p1[0] = p1[0]; 
+                    ms_p1[1] = p1[1]; 
+                    ms_p1[2] = p1[2];  
+                }
+
+            }
+            
+            if ( has_valid_contact ) {           
+                mat t = arbitraryTangent(ms_norm); 
+                vec r1 = zeros(3);
+                r1[0] = ms_p1[0]-B1.u()[0];
+                r1[1] = ms_p1[1]-B1.u()[1];
+                r1[2] = ms_p1[2]-B1.u()[2];
+                mat r2 = -B2.radius()*ms_norm; 
+                mat this_psi = zeros(1,1); 
+                this_psi(0) = ms_psi_n; 
+                
+                Contact c = Contact(cID++,TRIMESH,SPHERE,i,j,ms_norm,t,r1,r2,this_psi);
+                Contacts[num_contacts++] = c;
+                if ( !meshes[i].isStaticBody() ) {
+                    meshes[i].ContactCount++;  
+                    if (meshes[i].BodyIndex < 0) {
+                        meshes[i].BodyIndex = bID++;
+                        num_bodies++;
+                    }
+                }
+                if ( !spheres[j].isStaticBody() ) {
+                    spheres[j].ContactCount++;  
+                    if (spheres[j].BodyIndex < 0) {
+                        spheres[j].BodyIndex = bID++;
+                        num_bodies++;
+                    }
+                }
+            }
+        }
+    }
 }
 
 
