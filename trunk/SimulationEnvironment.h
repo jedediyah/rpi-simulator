@@ -1,6 +1,6 @@
 /* 
  * File:   SimulationEnvironment.h
- * Author: carser
+ * Author: Jedediyah Williams
  *
  * Created on November 10, 2012, 4:48 PM
  */

@@ -1,6 +1,6 @@
 /* 
  * File:   Body_sphere.cpp
- * Author: carser
+ * Author: Jedediyah Williams
  * 
  * Created on September 28, 2012, 7:53 PM
  */
@@ -18,6 +18,7 @@
 Body_sphere::Body_sphere() {
     Body_object::set_body_type("sphere");
     Radius = 0.5; 
+    Bounding_Radius = 0.65; 
     updateMassInertia(); 
     Mu = 0.5; 
 }
@@ -34,6 +35,7 @@ double Body_sphere::radius() { return Radius; }
 // Set methods
 void Body_sphere::setRadius(double r) { 
     Radius = r; 
+    Bounding_Radius = 1.1 *r; 
     updateMassInertia(); 
 }
 

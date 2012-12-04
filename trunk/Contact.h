@@ -1,6 +1,6 @@
 /* 
  * File:   Contact.h
- * Author: carser
+ * Author: Jedediyah Williams
  *
  * Created on November 10, 2012, 11:08 PM
  */

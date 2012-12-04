@@ -1,6 +1,6 @@
 /* 
  * File:   CollisionDetection.cpp
- * Author: carser
+ * Author: Jedediyah Williams
  * 
  * Created on November 10, 2012, 11:52 PM
  */
@@ -92,7 +92,7 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
                 
                 mat psi = zeros(1);
                 psi[0] = meshes[b].world_verts()[3*v+2];  // psi=z value
-                if (psi[0] > 0.5)  // TODO: this is a hardcoded epsilon 
+                if (psi[0] > 0.2)  // TODO: this is a hardcoded epsilon 
                     continue; 
                 mat n = zeros(3, 1);
                 n.at(2) = 1.0; // Normal to sphere is always up (+z direction)
@@ -129,8 +129,8 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
             double n_norm = norm(n,2);
             mat psi = zeros(1);  // 1x1 matrix
             psi(0) = n_norm -spheres[s2].radius() -spheres[s1].radius(); 
-            //if ( psi.at(0) -spheres[s1].radius() <   // Bounding spheres should include the radii...
-            //        spheres[s1].bounding_radius()+spheres[s2].bounding_radius() ) {
+            if ( psi.at(0) < spheres[s1].bounding_radius() - spheres[s1].radius()
+                           + spheres[s2].bounding_radius() - spheres[s2].radius() ) {
                 n = n/n_norm; // Normalize normal
                 mat t = arbitraryTangent(n); 
                 vec r1 =  n*spheres[s1].radius();
@@ -151,7 +151,7 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
                         num_bodies++;
                     }
                 }
-            //}
+            }
         }
     }
     
@@ -203,7 +203,7 @@ void CollisionDetection::findCollisions(Contact *Contacts, int &num_bodies, int 
                 psi_n[0] = triDist - B2.radius();  
                 n = n/norm(n,2); 
                 
-                if ( psi_n[0] > -.1 && abs(psi_n[0]) < abs(ms_psi_n) && psi_n[0] < 0.4 ) {   // Epsilons hardcoded in
+                if ( psi_n[0] > -.1 && abs(psi_n[0]) < abs(ms_psi_n) && psi_n[0] < 0.2 ) {   // Epsilons hardcoded in
                     has_valid_contact = true;
                     ms_psi_n = psi_n[0];
                     ms_norm = n;

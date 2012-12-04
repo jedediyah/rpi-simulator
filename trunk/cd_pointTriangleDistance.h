@@ -1,6 +1,6 @@
 /* 
  * File:   cd_pointTriangleDistance.h
- * Author: carser
+ * Author: Jedediyah Williams
  *
  * Created on December 1, 2012, 4:53 PM
  * 

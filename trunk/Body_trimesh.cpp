@@ -1,6 +1,6 @@
 /* 
  * File:   Body_Trimesh.cpp
- * Author: carser
+ * Author: Jedediyah Williams
  * 
  * Created on September 29, 2012, 8:25 PM
  */

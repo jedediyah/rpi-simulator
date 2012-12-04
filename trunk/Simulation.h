@@ -1,6 +1,6 @@
 /* 
  * File:   Simulation.h
- * Author: carser
+ * Author: Jedediyah Williams
  *
  * Created on September 28, 2012, 8:00 PM
  */
