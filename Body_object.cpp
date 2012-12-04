@@ -27,7 +27,7 @@ Body_object::Body_object() {
     Mu = 0.5; 
     IsStaticBody = 0; 
     Visible = true; 
-    Bounding_Radius = 1.0; 
+    Bounding_Radius = 1.1; 
     Color[0] = 1.0; 
     
     // Contact variables

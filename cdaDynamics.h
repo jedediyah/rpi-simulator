@@ -1,6 +1,6 @@
 /* 
  * File:   cdaDynamics.h
- * Author: carser
+ * Author: Jedediyah Williams
  *
  * Created on November 11, 2012, 10:57 PM
  */

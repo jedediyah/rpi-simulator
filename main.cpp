@@ -1,6 +1,6 @@
 /* 
  * File:   main.cpp
- * Author: carser
+ * Author: Jedediyah Williams
  *
  * Created on November 10, 2012, 4:34 PM
  */

@@ -1,6 +1,6 @@
 /* 
  * File:   Body_object.h
- * Author: carser
+ * Author: Jedediyah Williams
  *
  * Created on September 28, 2012, 7:37 PM
  */

@@ -1,6 +1,6 @@
 /* 
  * File:   Body_polymesh.cpp
- * Author: carser
+ * Author: Jedediyah Williams
  * 
  * Created on September 29, 2012, 3:18 PM
  */

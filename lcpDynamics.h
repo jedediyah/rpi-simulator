@@ -1,6 +1,6 @@
 /* 
  * File:   lcpDynamics.h
- * Author: carser
+ * Author: Jedediyah Williams
  *
  * Created on November 12, 2012, 11:17 AM
  */
@@ -25,7 +25,7 @@ vec lcpDynamics(Contact *Contacts, Body_sphere *spheres, int &num_spheres,
                  Body_trimesh *meshes, int &num_meshes, 
                  int &nb, int &nc, double &h) {
     
-    int nd = 7;  // Number of friction directions in discretized friction cone
+    int nd = 0;  // Number of friction directions in discretized friction cone
     
     /////////////////////////////////////
     // Initialize submatrices 

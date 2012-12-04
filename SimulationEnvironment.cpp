@@ -1,6 +1,6 @@
 /* 
  * File:   SimulationEnvironment.cpp
- * Author: carser
+ * Author: Jedediyah Williams
  * 
  * Created on November 10, 2012, 4:48 PM
  */
@@ -193,7 +193,7 @@ void initializeGL(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE);  // Double buffer (gets rid of flickering)
     glutInitWindowSize(width, height);
-    glutInitWindowPosition(300, 100); 
+    glutInitWindowPosition(1800, 100); 
     glutCreateWindow("RPI - Simulator");
     //glutSetIconTitle("I");
     glutDisplayFunc(drawScene); 
@@ -211,22 +211,63 @@ void initializeGL(int argc, char **argv)
     X[0] = 1.0;             Y[1] = 1.0;             Z[2] = 1.0;  // Unit vectors
     
     
-                            Body_trimesh tet = Body_trimesh("meshes/tetrahedron.poly");
-                            tet.setPosition(0.,0.,1.);
-                            tet.setStatic(true);
-                            tet.updateWorld_Verts();
-                            SIM.addBody(tet); 
-                            
-                            Body_trimesh tet2 = Body_trimesh("meshes/tetrahedron.poly");
-                            tet2.setPosition(0.1,1.,0.);
-                            tet2.setStatic(true);
-                            tet2.updateWorld_Verts();
-                            SIM.addBody(tet2); 
-
-                            Body_sphere sph = Body_sphere();
-                            sph.setRadius(0.2);
-                            sph.setPosition(0,0.1,2);
-                            SIM.addBody(sph); 
+//                            Body_trimesh tet = Body_trimesh("meshes/tetrahedron.poly");
+//                            tet.setPosition(0.,0.,1.);
+//                            tet.setStatic(true);
+//                            tet.updateWorld_Verts();
+//                            SIM.addBody(tet); 
+//                            
+//                            Body_trimesh tet2 = Body_trimesh("meshes/tetrahedron.poly");
+//                            tet2.setPosition(0.1,1.,0.);
+//                            tet2.setStatic(true);
+//                            tet2.updateWorld_Verts();
+//                            SIM.addBody(tet2); 
+//
+//                            Body_sphere sph = Body_sphere();
+//                            sph.setRadius(0.2);
+//                            sph.setPosition(0,0.1,2);
+//                            SIM.addBody(sph); 
+//    // Make a tetrahedron grid
+//    for (double x=-6; x<=6; x+=2){
+//        for (double y=-6; y<=6; y+=2) {
+//            Body_trimesh tet = Body_trimesh("meshes/icosahedron.poly");
+//            tet.setPosition(x,y,2);
+//            tet.setStatic(true);
+//            tet.updateWorld_Verts();
+//            SIM.addBody(tet); 
+//        }
+//    }
+//    // Make some spheres
+//    for (double x=-4; x<=4; x+=2){
+//        for (double y=-6; y<=6; y+=2) {
+//            Body_sphere sph = Body_sphere();
+//            //sph.setRadius(0.8);
+//            x += (rand()%1000)/2000.0;
+//            y += (rand()%1000)/2000.0;
+//            sph.setPosition(x,y,4.0);
+//            SIM.addBody(sph);
+//        }
+//    }
+//    for (double x=-4; x<=4; x+=2){
+//        for (double y=-6; y<=6; y+=2) {
+//            Body_sphere sph = Body_sphere();
+//            //sph.setRadius(0.8);
+//            x += (rand()%1000)/2000.0;
+//            y += (rand()%1000)/2000.0;
+//            sph.setPosition(x,y,7.0 + (rand()%1000)/2000.0 );
+//            SIM.addBody(sph);
+//        }
+//    }
+//    for (double x=-1; x<=1; x+=1){
+//        for (double y=-2; y<=2; y+=1) {
+//            Body_sphere sph = Body_sphere();
+//            //sph.setRadius(0.8);
+//            x += (rand()%1000)/2000.0;
+//            y += (rand()%1000)/2000.0;
+//            sph.setPosition(x,y,9.0 + (rand()%1000)/2000.0 );
+//            SIM.addBody(sph);
+//        }
+//    }
     
     updateLookVectors();    
     makeMenu(); 

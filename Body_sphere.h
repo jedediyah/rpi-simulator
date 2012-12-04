@@ -1,6 +1,6 @@
 /* 
  * File:   Body_sphere.h
- * Author: carser
+ * Author: Jedediyah Williams
  *
  * Created on September 28, 2012, 7:53 PM
  */

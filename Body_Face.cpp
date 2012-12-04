@@ -1,6 +1,6 @@
 /* 
  * File:   Body_Face.cpp
- * Author: carser
+ * Author: Jedediyah Williams
  * 
  * Created on September 29, 2012, 8:59 PM
  */
