@@ -193,7 +193,7 @@ void initializeGL(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE);  // Double buffer (gets rid of flickering)
     glutInitWindowSize(width, height);
-    glutInitWindowPosition(1800, 100); 
+    glutInitWindowPosition(300, 100); 
     glutCreateWindow("RPI - Simulator");
     //glutSetIconTitle("I");
     glutDisplayFunc(drawScene); 
