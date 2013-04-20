@@ -167,7 +167,8 @@ __global__ void initialize_particles(float4 *pos, unsigned int width, unsigned i
         float unit = 410.0/mesh_width;
         float dx = abs(1.0*x-mesh_width/2.0);
         float dy = abs(1.0*y-mesh_height/2.0); 
-        if (makeStatic || dx < unit && dy < unit )
+        //if (makeStatic || dx < unit && dy < unit )
+        if (makeStatic || x==y )
             point_is_fixed[tid] = true; 
         else
             point_is_fixed[tid] = false; 
