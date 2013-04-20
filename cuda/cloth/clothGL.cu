@@ -1,4 +1,8 @@
 
+#define MSH_WIDTH   150
+#define MSH_HEIGHT  150
+
+#define BLOCK_N 10
 
 // Includes, system
 #include <stdlib.h>
@@ -20,7 +24,7 @@
 #include <GL/freeglut.h>
 #endif
 
-// Includes, cuda
+// Includes, cudah
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
@@ -37,7 +41,7 @@
 
 #define MAX_EPSILON_ERROR 10.0f
 #define THRESHOLD         0.30f
-#define REFRESH_DELAY     10    //ms
+#define REFRESH_DELAY     0.0  //10    //ms
 #define TIME_STEP         0.001 // s
 #define MAX_FORCE         5.0   // N
 
@@ -46,8 +50,8 @@
 const unsigned int window_width  = 512;
 const unsigned int window_height = 512;
 
-const unsigned int mesh_width    = 400;//256;
-const unsigned int mesh_height   = 400;//256;
+const unsigned int mesh_width    = MSH_WIDTH;//256;
+const unsigned int mesh_height   = MSH_HEIGHT;//256;
 
 int simulation_step = 0; 
 time_t SimTimerStart;
@@ -124,10 +128,16 @@ float3 *dev_forces;
 // Initialize the positions of all the cloth particles.  
 ///////////////////////////////////////////////////////////////////////////////
 __global__ void initialize_particles(float4 *pos, unsigned int width, unsigned int height) {
-    unsigned int tid = blockIdx.x*blockDim.x + threadIdx.x;   
-    unsigned int y = tid / width; 
-    unsigned int x = tid % width; 
-
+    //unsigned int tid = blockIdx.x*blockDim.x + threadIdx.x;   
+    //unsigned int y = tid / width; 
+    //unsigned int x = tid % width; 
+    
+    unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
+    unsigned int y = blockIdx.y*blockDim.y + threadIdx.y;
+    unsigned int tid = y*MSH_WIDTH + x;
+    
+    //printf("INIT hello from %d\n", tid);
+        //return;
 
     if (tid < width*height) {
         // Calculate uv coordinates (w = 0.0) 
@@ -144,7 +154,20 @@ __global__ void initialize_particles(float4 *pos, unsigned int width, unsigned i
         
         // Fix the top corners
         //if ((x==0 || x==width-1) && y==height-1) 
-        if (x==0 && y==0 || x==0 && y==mesh_height-1 || x==mesh_width-1 && y==0 || x==mesh_width-1 && y==mesh_height-1)
+        //if (x==0 && y==0 || x==0 && y==mesh_height-1 || x==mesh_width-1 && y==0 || x==mesh_width-1 && y==mesh_height-1 || x==mesh_width/2 && y==mesh_height/2)
+        
+        bool makeStatic = false;
+        // corners
+        if (x<4 && y==0 || x==0 && y<4 ||
+            x > mesh_width-5 && y == 0 || x == mesh_width-1 && y < 4 ||
+            x > mesh_width-5 && y == mesh_height-1 || x == mesh_width-1 && y > mesh_height-5 ||
+            x < 4 && y == mesh_height-1 || x == 0 && y > mesh_height - 5)
+            makeStatic = true;
+        
+        float unit = 410.0/mesh_width;
+        float dx = abs(1.0*x-mesh_width/2.0);
+        float dy = abs(1.0*y-mesh_height/2.0); 
+        if (makeStatic || dx < unit && dy < unit )
             point_is_fixed[tid] = true; 
         else
             point_is_fixed[tid] = false; 
@@ -216,9 +239,16 @@ __device__ float4 getCorrection(float4 *pos, unsigned int p1, unsigned int p2, f
 #define DAMPING 0.05
 __global__ void update_particles(float4 *pos, unsigned int width, unsigned int height, float time, float3 *dev_pos, float3 *dev_forces)
 {
-    unsigned int tid = blockIdx.x*blockDim.x + threadIdx.x;     // Thread ID    
-    unsigned int y = tid / width;                               // x and y grid coordinates
-    unsigned int x = tid % width; 
+    //unsigned int tid = blockIdx.x*blockDim.x + threadIdx.x;     // Thread ID    
+    //unsigned int y = tid / width;                               // x and y grid coordinates
+    //unsigned int x = tid % width; 
+    
+    unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
+    unsigned int y = blockIdx.y*blockDim.y + threadIdx.y;
+    unsigned int tid = y*MSH_WIDTH + x;
+    
+    //printf("UPDATE hello from %d\n", tid);
+        //return;
 
     if (tid < width*height) {       // Asserts that the thread points to a valid index
         // Initialize force as zero + gravity
@@ -326,10 +356,13 @@ __global__ void update_particles(float4 *pos, unsigned int width, unsigned int h
 // Execute the kernel
 void launch_kernel(float4 *pos, unsigned int mesh_width, unsigned int mesh_height, float time)
 {    
-    dim3 block(NUM_BLOCKS, THREADS_PER_BLOCK, 1);
+    dim3 block(BLOCK_N, BLOCK_N, 1);
     dim3 grid(max(1,mesh_width / block.x), max(1,mesh_height / block.y), 1);
-    //update_particles<<<grid,block>>>(pos, mesh_width, mesh_height, time);
-    update_particles<<<NUM_BLOCKS,THREADS_PER_BLOCK>>>(pos, mesh_width, mesh_height, time, dev_pos, dev_forces);
+    
+    //printf("BLOCK: %d, %d, %d\nGRID: %d, %d, %d\n",block.x, block.y, block.z, grid.x, grid.y, grid.z);
+    
+    update_particles<<<grid,block>>>(pos, mesh_width, mesh_height, time, dev_pos, dev_forces);
+    //update_particles<<<NUM_BLOCKS,THREADS_PER_BLOCK>>>(pos, mesh_width, mesh_height, time, dev_pos, dev_forces);
     
     //printf("Time step: %d\n",simulation_step);
     if (simulation_step == 0) {
@@ -479,7 +512,12 @@ void initCuda(struct cudaGraphicsResource **vbo_resource)
     
     //dim3 block(NUM_BLOCKS, THREADS_PER_BLOCK, 1);
     //dim3 grid(max(1,mesh_width / block.x), max(1,mesh_height / block.y), 1);
-    initialize_particles<<<NUM_BLOCKS,THREADS_PER_BLOCK>>>(dptr, mesh_width, mesh_height);
+    
+    dim3 block(BLOCK_N, BLOCK_N, 1);
+    dim3 grid(max(1,mesh_width / block.x), max(1,mesh_height / block.y), 1);
+    initialize_particles<<<grid,block>>>(dptr, mesh_width, mesh_height);
+    
+    //initialize_particles<<<NUM_BLOCKS,THREADS_PER_BLOCK>>>(dptr, mesh_width, mesh_height);
         
     launch_kernel(dptr, mesh_width, mesh_height, g_fAnim);
     // unmap buffer object
@@ -500,7 +538,8 @@ void runCuda(struct cudaGraphicsResource **vbo_resource)
         cudaGraphicsResourceGetMappedPointer((void **)&dptr, &num_bytes, *vbo_resource);
         //printf("CUDA mapped VBO: May access %ld bytes\n", num_bytes);
             
-        launch_kernel(dptr, mesh_width, mesh_height, g_fAnim);
+        for (int i=0; i<10; i++) // Simulate 10 steps before updating graphics
+            launch_kernel(dptr, mesh_width, mesh_height, g_fAnim);
 
         // unmap buffer object
         checkCudaErrors(cudaGraphicsUnmapResources(1, vbo_resource, 0));
@@ -572,7 +611,7 @@ void display()
     glVertexPointer(4, GL_FLOAT, 0, 0);
 
     // Draw points
-    glPointSize(1.0); 
+    glPointSize(3.0); 
     glEnableClientState(GL_VERTEX_ARRAY);
         glColor3f(0.3, 0.3, 0.4);
         glDrawArrays(GL_POINTS, 0, mesh_width * mesh_height);
@@ -612,8 +651,8 @@ void display()
             glVertex3f(p.x, p.y, p.z);
             glVertex3f(p.x+f.x, p.y+f.y, p.z+f.z);
         glEnd();
-    }*/
-    
+    }
+    */
     
     glutSwapBuffers();
 
